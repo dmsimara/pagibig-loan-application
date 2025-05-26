@@ -1,25 +1,39 @@
 package com.mycompany.pagibigapplication.tests;
 
-import com.mycompany.pagibigapplication.services.AuthService;
+import com.mycompany.pagibigapplication.db.DBConnection;
+import com.mycompany.pagibigapplication.models.Employer;
+import com.mycompany.pagibigapplication.services.EmployerService;
+
+
+import java.sql.Connection;
+import java.util.List;
 
 public class AuthServiceTest {
     public static void main(String[] args) {
-        AuthService authService = new AuthService();
+        try {
+            Connection conn = DBConnection.getConnection();
+            EmployerService employerService = new EmployerService(conn);
 
-        // Test correct admin login
-        boolean success1 = authService.adminLogin("admin1", "thisisadmin1");
-        System.out.println("Test 1 (correct credentials): " + (success1 ? "Passed" : "Failed"));
+            // Fetch all loan applications
+            List<Employer> employersList = employerService.getEmployers();
 
-        // Test incorrect username
-        boolean success2 = authService.adminLogin("wronguser", "admin123");
-        System.out.println("Test 2 (wrong username): " + (!success2 ? "Passed" : "Failed"));
+            // Print the results
+            for (Employer employer : employersList) {
+                System.out.println("Employer ID: " + employer.getEmployerId());
+                System.out.println("Phone (Direct): " + employer.getEmployerPhoneDirect());
+                System.out.println("Phone (Trunk): " + employer.getEmployerPhoneTrunk());
+                System.out.println("Email: " + employer.getEmployerEmail());
+                System.out.println("Name: " + employer.getEmployerName());
+                System.out.println("Address: " + employer.getEmployerAddress());
+                System.out.println("Industry: " + employer.getIndustry());
+                System.out.println("Preferred Contact Time: " + employer.getPreferredContactTime());
+                System.out.println("---------------");
+            }
 
-        // Test incorrect password
-        boolean success3 = authService.adminLogin("admin", "wrongpass");
-        System.out.println("Test 3 (wrong password): " + (!success3 ? "Passed" : "Failed"));
 
-        // Test both wrong
-        boolean success4 = authService.adminLogin("wronguser", "wrongpass");
-        System.out.println("Test 4 (both wrong): " + (!success4 ? "Passed" : "Failed"));
+            conn.close();
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
     }
 }

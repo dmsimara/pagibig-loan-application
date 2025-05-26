@@ -1,0 +1,316 @@
+
+package com.mycompany.pagibigapplication.gui;
+
+import com.mycompany.pagibigapplication.db.DBConnection;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.Color;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.util.ArrayList;
+import java.util.List;
+import javax.swing.JPanel;
+import javax.swing.JLabel;
+import java.awt.Font;
+import javax.swing.JButton;
+import javax.swing.ImageIcon;
+import java.awt.Cursor;
+import javax.swing.JOptionPane;
+import javax.swing.JSeparator;
+import javax.swing.border.LineBorder;
+
+import com.mycompany.pagibigapplication.services.AuthService;
+import com.mycompany.pagibigapplication.gui.RoundedPanel;
+
+public class CollateralPage extends javax.swing.JFrame {
+    private JPanel topBar;
+    private JPanel sideBar;
+    private JSeparator applicantSeparator;
+    private JLabel helpLabel;
+    
+    private List<JButton> sidebarButtons = new ArrayList<>();
+    private JButton activeButton = null;
+    
+    private final AuthService authService;
+
+    public CollateralPage(AuthService authService) {
+        this.authService = authService;
+        
+        setTitle("PagIBIG Housing Loan Application");
+        ImageIcon icon = new ImageIcon("src/main/java/com/mycompany/pagibigapplication/resources/logoIcon.png");
+        setIconImage(icon.getImage());
+        
+        initComponents();
+        setSize(1280, 720);            
+        setLocationRelativeTo(null);
+        setLayout(null);  
+        addCustomComponents();
+    }
+
+
+    @SuppressWarnings("unchecked")
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+    private void initComponents() {
+
+        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+
+        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
+        getContentPane().setLayout(layout);
+        layout.setHorizontalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 400, Short.MAX_VALUE)
+        );
+        layout.setVerticalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 300, Short.MAX_VALUE)
+        );
+
+        pack();
+    }// </editor-fold>//GEN-END:initComponents
+
+    private void addCustomComponents() {
+        
+        // for top bar
+        topBar = new JPanel();
+        topBar.setBackground(Color.WHITE);
+        topBar.setBounds(0, 0, getWidth(), 45);  
+        topBar.setLayout(null);  
+        this.getContentPane().add(topBar);
+        
+        // for sidebar
+        sideBar = new JPanel();
+        sideBar.setBackground(Color.decode("#1F41BB"));   
+        sideBar.setBounds(0, 45, 220, getHeight() - 45);   
+        sideBar.setLayout(null);  
+        this.getContentPane().add(sideBar);
+        
+        JLabel mainMenuLabel = new JLabel("Main Menu");
+        mainMenuLabel.setForeground(Color.WHITE);
+        mainMenuLabel.setFont(new Font("Poppins", Font.BOLD, 12));   
+        mainMenuLabel.setBounds(20, 15, 160, 30);  
+        sideBar.add(mainMenuLabel);
+        
+        JButton dashboardButton = createSidebarButton("Dashboard", "src/main/java/com/mycompany/pagibigapplication/resources/dashboardIcon.png", 50);
+        JButton loanQueueButton = createSidebarButton("Loan Queue", "src/main/java/com/mycompany/pagibigapplication/resources/loanQueueIcon.png", 100);
+        JButton applicantButton = createSidebarButton("Applicant Records ˅", "src/main/java/com/mycompany/pagibigapplication/resources/applicantIcon.png", 150);
+        
+        sideBar.add(dashboardButton);
+        sideBar.add(loanQueueButton);
+        sideBar.add(applicantButton);
+        
+        
+
+        JPanel dropdownPanel = new JPanel();
+        dropdownPanel.setLayout(null);
+        dropdownPanel.setBounds(10, 190, 230, 240);
+        dropdownPanel.setBackground(Color.decode("#1F41BB"));
+        dropdownPanel.setVisible(false);
+        sideBar.add(dropdownPanel);
+
+        String[] subItems = {
+            "Loan Particular", "Member", "Collateral", "Spouse",
+            "Bank", "Real Estate", "Outstanding Credits", "Employer"
+        };
+
+        for (int i = 0; i < subItems.length; i++) {
+            JButton subButton = new JButton(subItems[i]);
+            subButton.setBounds(15, i * 30, 200, 30);
+            subButton.setFont(new Font("Poppins", Font.PLAIN, 13));
+            subButton.setForeground(Color.WHITE);
+            subButton.setBackground(Color.decode("#1F41BB"));
+            subButton.setBorderPainted(false);
+            subButton.setFocusPainted(false);
+            subButton.setHorizontalAlignment(JButton.LEFT);
+            subButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
+            addHoverEffect(subButton);
+
+            String strItem = subItems[i];
+            subButton.addActionListener(e -> {
+                setActiveButton(subButton);
+                switch (strItem) {
+                    case "Loan Particular":
+                        new LoanParticular(authService).setVisible(true);
+                        break;
+                    case "Bank":
+                        new BankPage(authService).setVisible(true);
+                        break;
+                    case "Member":
+                        new MemberPage(authService).setVisible(true);
+                        break;
+                    case "Collateral":
+                        new CollateralPage(authService).setVisible(true);
+                        break;
+                    case "Spouse":
+                        new SpousePage(authService).setVisible(true);
+                        break;
+                    case "Real Estate":
+                        new RealEstatePage(authService).setVisible(true);
+                        break;
+                    case "Outstanding Credits":
+                        new OutstandingCreditsPage(authService).setVisible(true);
+                        break;
+                    case "Employer":
+                        new EmployerPage(authService).setVisible(true);
+                        break;
+                    default:
+                        JOptionPane.showMessageDialog(this, "Page not yet implemented.");
+                }
+                this.dispose();
+            });
+
+            dropdownPanel.add(subButton);
+        }
+
+        // separator
+        applicantSeparator = new JSeparator();
+        applicantSeparator.setForeground(Color.WHITE);
+        applicantSeparator.setBounds(15, 195, 180, 1);
+        sideBar.add(applicantSeparator);
+        
+        // settings
+        JLabel helpLabel = new JLabel("Help and Support");
+        helpLabel.setForeground(Color.WHITE);
+        helpLabel.setFont(new Font("Poppins", Font.BOLD, 12));
+        helpLabel.setBounds(20, applicantSeparator.getY() + 10, 160, 30);
+        sideBar.add(helpLabel);
+        
+        JButton settingsButton = createSidebarButton("Settings", "src/main/java/com/mycompany/pagibigapplication/resources/settingsIcon.png", 250);
+        sideBar.add(settingsButton);
+        addHoverEffect(settingsButton);
+        sidebarButtons.add(settingsButton);
+        
+        // logout
+        JSeparator bottomSeparator = new JSeparator();
+        bottomSeparator.setForeground(Color.WHITE);
+        bottomSeparator.setBounds(10, sideBar.getHeight() - 100, 180, 1);
+        sideBar.add(bottomSeparator);
+        
+        int logoutY = sideBar.getHeight() - 90; 
+        JButton logoutButton = createSidebarButton("Log out", "src/main/java/com/mycompany/pagibigapplication/resources/logoutIcon.png", logoutY);
+        sideBar.add(logoutButton);
+        addHoverEffect(logoutButton);
+        sidebarButtons.add(logoutButton);
+        
+        logoutButton.addActionListener(e -> {
+            int intChoice = JOptionPane.showConfirmDialog(this, "Are you sure you want to log out?", "Confirm Logout", JOptionPane.YES_NO_OPTION);
+            
+            if (intChoice == JOptionPane.YES_OPTION) {
+                String strRole = authService.getCurrentUserRole();
+                authService.logout();
+                
+                JOptionPane.showMessageDialog(this, "You have been logged out.");
+                this.dispose();
+                
+                if ("admin".equals(strRole)) {
+                    new AdminLogin(authService).setVisible(true);
+                } else if ("member".equals(strRole)) {
+                    new MemberLogin(authService).setVisible(true);
+                } else {
+                    new AdminLogin(authService).setVisible(true);
+                }
+            }
+        });
+
+        applicantButton.addActionListener(e -> {
+            boolean isVisible = dropdownPanel.isVisible();
+            dropdownPanel.setVisible(!isVisible);
+            applicantButton.setText("Applicant Records " + (isVisible ? "˅" : "˄"));
+            setActiveButton(applicantButton);
+            
+            int intDropdownHeight = dropdownPanel.getComponentCount() * 30;
+            int intNewY = isVisible ? 200 : 200 + intDropdownHeight;
+            
+            applicantSeparator.setBounds(10, intNewY, 180, 1);
+            helpLabel.setBounds(20, intNewY + 10, 160, 30);
+            settingsButton.setBounds(10, intNewY + 50, 180, 40);
+        });
+
+        dashboardButton.addActionListener(e -> {
+            setActiveButton(dashboardButton);
+            new AdminDashboard(authService).setVisible(true);
+            this.dispose();
+        });
+
+        loanQueueButton.addActionListener(e -> {
+            setActiveButton(loanQueueButton);
+            new LoanQueue(authService).setVisible(true);
+            this.dispose();
+        });
+
+        addHoverEffect(dashboardButton);
+        addHoverEffect(loanQueueButton);
+
+        sidebarButtons.add(dashboardButton);
+        sidebarButtons.add(loanQueueButton);
+        
+        RoundedPanel contentPanel = new RoundedPanel(40);
+        contentPanel.setBounds(240, 70, 1000, 580);
+        contentPanel.setBackground(Color.WHITE);
+        contentPanel.setLayout(null);
+        this.getContentPane().add(contentPanel);
+        
+        
+
+        setActiveButton(loanQueueButton);
+
+        this.getContentPane().repaint();
+        this.getContentPane().revalidate();
+    }
+    
+    private JButton createSidebarButton(String text, String iconPath, int yPosition) {
+        ImageIcon icon = new ImageIcon(iconPath);
+        JButton button = new JButton(text, icon);
+        button.setBounds(10, yPosition, 220, 40);
+        button.setFont(new Font("Poppins", Font.PLAIN, 14));
+        button.setForeground(Color.WHITE);
+        button.setBackground(Color.decode("#1F41BB"));
+        button.setBorderPainted(false);
+        button.setFocusPainted(false);
+        button.setHorizontalAlignment(JButton.LEFT);
+        button.setIconTextGap(10);
+        button.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        return button;
+    }
+
+    private void addHoverEffect(JButton button) {
+        button.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                if (button != activeButton) {
+                    button.setBackground(Color.decode("#12297D"));
+                }
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                if (button != activeButton) {
+                    button.setBackground(Color.decode("#1F41BB"));
+                }
+            }
+        });
+    }
+
+    private void setActiveButton(JButton button) {
+        for (JButton btn : sidebarButtons) {
+            if (btn == button) {
+                btn.setBackground(Color.decode("#12297D")); 
+            } else {
+                btn.setBackground(Color.decode("#1F41BB")); 
+            }
+        }
+        activeButton = button;
+    }
+
+    public static void main(String args[]) {
+     
+        java.awt.EventQueue.invokeLater(new Runnable() {
+            public void run() {
+                new CollateralPage(new AuthService()).setVisible(true);
+            }
+        });
+    }
+
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    // End of variables declaration//GEN-END:variables
+}
