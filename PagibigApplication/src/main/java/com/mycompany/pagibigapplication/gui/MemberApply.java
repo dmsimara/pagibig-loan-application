@@ -502,40 +502,26 @@ public class MemberApply extends javax.swing.JFrame {
         nextButton.setFont(new Font("SansSerif", Font.BOLD, 14));
         nextButton.setForeground(Color.WHITE);
         nextButton.setBackground(Color.decode("#1F41BB"));
-        nextButton.setBounds(contentPanel.getWidth() - 120, contentPanel.getHeight() - 60, 100, 30);
+        nextButton.setBounds(contentPanel.getWidth() - 100, contentPanel.getHeight() - 50, 70, 30);
         nextButton.setFocusPainted(false); 
         nextButton.setBorderPainted(false); 
         nextButton.setOpaque(true);  
         nextButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-
+        
         nextButton.addActionListener(e -> {
-            purposeLabel.setVisible(false);
-            desiredLoanAmountLabel.setVisible(false);
-            exclusiveNoteLabel.setVisible(false);
-            desiredLoanAmountField.setVisible(false);
-            desiredLoanTermLabel.setVisible(false);
-            yearsLabel.setVisible(false);
-            desiredLoanTermField.setVisible(false);
-            repricingPeriodLabel.setVisible(false);
-            repricingNote.setVisible(false);
-            radioPanel.setVisible(false);
-            paymentLabel.setVisible(false);
-            paymentPanel.setVisible(false);
-            existingAppLabel.setVisible(false);
-            yesRadio.setVisible(false);
-            noRadio.setVisible(false);
-            housingAppNoLabel.setVisible(false);
-            housingAppNoField.setVisible(false);
-            for (JRadioButton radioButton : radioButtons) {
-                radioButton.setVisible(false); 
-            }
-            progressBar.setCurrentStep(2);
+            contentPanel.setVisible(false); 
+
+            MemberApply2 memberApply2 = new MemberApply2(authService);
+            memberApply2.setBounds(240, 70, 1000, 580); 
+            this.getContentPane().add(memberApply2);
+            memberApply2.setVisible(true); 
+
+            this.getContentPane().revalidate();
+            this.getContentPane().repaint();
             System.out.println("Next button clicked, moving to step 2.");
         });
         contentPanel.add(nextButton);
         
-
-
 
         this.getContentPane().repaint();
         this.getContentPane().revalidate();
