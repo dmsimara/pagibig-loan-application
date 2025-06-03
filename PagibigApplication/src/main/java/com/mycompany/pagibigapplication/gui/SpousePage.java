@@ -76,6 +76,40 @@ public class SpousePage extends javax.swing.JFrame {
         topBar.setLayout(null);  
         this.getContentPane().add(topBar);
         
+        // icon header
+        ImageIcon header = new ImageIcon("src/main/java/com/mycompany/pagibigapplication/resources/header.png");
+        int intWidth = header.getIconWidth();
+        int intHeight = header.getIconHeight();
+        int intTargetH = 40;
+        int intTargetW = (intWidth * intTargetH) / intHeight;
+        Image scaledImage = header.getImage().getScaledInstance(intTargetW, intTargetH, Image.SCALE_SMOOTH);
+        ImageIcon scaledIcon = new ImageIcon(scaledImage);
+        JLabel imageLabel = new JLabel(scaledIcon);
+        int intYOffset = (45 - intTargetH) / 2;
+        imageLabel.setBounds(10, intYOffset, intTargetW, intTargetH);
+        topBar.add(imageLabel);
+        
+        // profile
+        ImageIcon profileIcon = new ImageIcon("src/main/java/com/mycompany/pagibigapplication/resources/profile.png");
+        int intProfileH = 30;
+        int intProfileW = (profileIcon.getIconWidth() * intProfileH) / profileIcon.getIconHeight();
+        Image profileImage = profileIcon.getImage().getScaledInstance(intProfileW, intProfileH, Image.SCALE_SMOOTH);
+        ImageIcon scaledProfileIcon = new ImageIcon(profileImage);
+        JLabel profileLabel = new JLabel(scaledProfileIcon);
+        
+        int intProfileO = (45 - intProfileH) / 2;
+        int intProfileX = topBar.getWidth() - 170;
+        profileLabel.setBounds(intProfileX, intProfileO, intProfileW, intProfileH);
+        topBar.add(profileLabel);
+        
+        // "Hello, Admin"
+        JLabel greetingLabel = new JLabel("<html><b>Hello,</b> Admin!</html>");
+        greetingLabel.setForeground(Color.BLACK);
+        greetingLabel.setFont(new Font("SansSerif", Font.PLAIN, 16));
+        int intGreeting = intProfileX + intProfileW + 10;
+        greetingLabel.setBounds(intGreeting, intProfileO, 100, intProfileH);
+        topBar.add(greetingLabel);
+        
         // for sidebar
         sideBar = new JPanel();
         sideBar.setBackground(Color.decode("#1F41BB"));   

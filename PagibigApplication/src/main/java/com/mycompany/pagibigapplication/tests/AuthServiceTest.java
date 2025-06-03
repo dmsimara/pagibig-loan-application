@@ -1,8 +1,8 @@
 package com.mycompany.pagibigapplication.tests;
 
 import com.mycompany.pagibigapplication.db.DBConnection;
-import com.mycompany.pagibigapplication.models.Employer;
-import com.mycompany.pagibigapplication.services.EmployerService;
+import com.mycompany.pagibigapplication.models.Application;
+import com.mycompany.pagibigapplication.services.ApplicationService;
 
 
 import java.sql.Connection;
@@ -12,21 +12,19 @@ public class AuthServiceTest {
     public static void main(String[] args) {
         try {
             Connection conn = DBConnection.getConnection();
-            EmployerService employerService = new EmployerService(conn);
+            ApplicationService applicationService = new ApplicationService(conn);
 
             // Fetch all loan applications
-            List<Employer> employersList = employerService.getEmployers();
+            List<Application> applicationsList = applicationService.getApplications();
 
             // Print the results
-            for (Employer employer : employersList) {
-                System.out.println("Employer ID: " + employer.getEmployerId());
-                System.out.println("Phone (Direct): " + employer.getEmployerPhoneDirect());
-                System.out.println("Phone (Trunk): " + employer.getEmployerPhoneTrunk());
-                System.out.println("Email: " + employer.getEmployerEmail());
-                System.out.println("Name: " + employer.getEmployerName());
-                System.out.println("Address: " + employer.getEmployerAddress());
-                System.out.println("Industry: " + employer.getIndustry());
-                System.out.println("Preferred Contact Time: " + employer.getPreferredContactTime());
+            for (Application app : applicationsList) {
+                System.out.println("Application No: " + app.getApplicationNo());
+                System.out.println("Pagibig MID: " + app.getPagibigMid());
+                System.out.println("Member Name: " + app.getMemberName());
+                System.out.println("Date Submitted: " + app.getDateSubmitted());
+                System.out.println("Status: " + app.getStatus());
+               
                 System.out.println("---------------");
             }
 
