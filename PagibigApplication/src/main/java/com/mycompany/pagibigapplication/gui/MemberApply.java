@@ -511,7 +511,7 @@ public class MemberApply extends javax.swing.JFrame {
         nextButton.addActionListener(e -> {
             contentPanel.setVisible(false); 
 
-            MemberApply2 memberApply2 = new MemberApply2(authService);
+            MemberApply2 memberApply2 = new MemberApply2(this, contentPanel, authService);
             memberApply2.setBounds(240, 70, 1000, 580); 
             this.getContentPane().add(memberApply2);
             memberApply2.setVisible(true); 
@@ -520,6 +520,7 @@ public class MemberApply extends javax.swing.JFrame {
             this.getContentPane().repaint();
             System.out.println("Next button clicked, moving to step 2.");
         });
+
         contentPanel.add(nextButton);
         
 

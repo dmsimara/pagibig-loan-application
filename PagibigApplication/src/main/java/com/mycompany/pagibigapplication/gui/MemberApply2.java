@@ -14,19 +14,23 @@ import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFormattedTextField;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
-import javax.swing.SwingUtilities;
 
 
 
 public class MemberApply2 extends javax.swing.JPanel {
 
     private final AuthService authService;
+    private JPanel previousPanel;
+    private JFrame parentFrame;
     
-    public MemberApply2(AuthService authService) {
+    public MemberApply2(JFrame parentFrame, JPanel previousPanel, AuthService authService) {
+        this.parentFrame = parentFrame;
+        this.previousPanel = previousPanel;
         this.authService = authService;
         initComponents();
         
@@ -457,43 +461,43 @@ public class MemberApply2 extends javax.swing.JPanel {
         
         // Back Button
         JButton backButton = new JButton("Back");
-        backButton.setFont(new Font("SansSerif", Font.BOLD, 14)); // Same font as nextButton
+        backButton.setFont(new Font("SansSerif", Font.BOLD, 14));  
         backButton.setForeground(Color.WHITE);
-        backButton.setBackground(Color.decode("#43404066")); // Background color
-        backButton.setBounds(nextButton.getX() - 80 - 10, nextButton.getY(), 70, 30); // Positioned to the left of nextButton
+        backButton.setBackground(Color.decode("#43404066")); 
+        backButton.setBounds(nextButton.getX() - 80 - 10, nextButton.getY(), 70, 30);  
         backButton.setFocusPainted(false);
         backButton.setBorderPainted(false);
         backButton.setOpaque(true);
         backButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
         nextButton.addActionListener(e -> {
-            contentPanel.setVisible(false); 
-            MemberApply3 memberApply3 = new MemberApply3(); // If MemberApply3 needs authService, pass it here
-            memberApply3.setBounds(240, 70, 1000, 580); 
-            contentPanel.add(memberApply3);
-            memberApply3.setVisible(true); 
-            contentPanel.revalidate();
-            contentPanel.repaint();
+            this.setVisible(false); // Hide MemberApply2 panel
+
+            MemberApply3 memberApply3 = new MemberApply3(parentFrame, this, authService);
+            memberApply3.setBounds(240, 70, 1000, 580);
+            parentFrame.getContentPane().add(memberApply3);
+            memberApply3.setVisible(true);
+
+            parentFrame.revalidate();
+            parentFrame.repaint();
+
             System.out.println("Next button clicked, moving to step 3.");
         });
+
         contentPanel.add(nextButton);
 
         backButton.addActionListener(e -> {
-            contentPanel.setVisible(false);
-            
-            MemberApply memberApply = new MemberApply(authService); // Pass authService back
-            memberApply.setBounds(240, 70, 1000, 580);
-            contentPanel.getParent().add(memberApply); // Use getParent() to add to the main container
-            
-            memberApply.setVisible(true);
-            
-            contentPanel.getParent().revalidate();
-            contentPanel.getParent().repaint();
-            System.out.println("Back button clicked, returned to MemberApply.");
+            this.setVisible(false);
+            parentFrame.getContentPane().remove(this);
+
+            previousPanel.setVisible(true);
+
+            parentFrame.revalidate();
+            parentFrame.repaint();
+            System.out.println("Back button clicked, returning to step 1.");
         });
+
         contentPanel.add(backButton);
-
-
     }
     
     private void addPlaceholder(JTextField field, String placeholder) {
