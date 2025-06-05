@@ -17,10 +17,18 @@ import javax.swing.ImageIcon;
 import java.awt.Cursor;
 import javax.swing.JOptionPane;
 import javax.swing.JSeparator;
-import javax.swing.border.LineBorder;
 
 import com.mycompany.pagibigapplication.services.AuthService;
-import com.mycompany.pagibigapplication.gui.RoundedPanel;
+import com.mycompany.pagibigapplication.models.Spouse;
+import com.mycompany.pagibigapplication.services.SpouseService;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.regex.Pattern;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.JTableHeader;
+import javax.swing.table.TableColumnModel;
+import javax.swing.table.TableRowSorter;
 
 public class SpousePage extends javax.swing.JFrame {
     private JPanel topBar;
@@ -248,9 +256,7 @@ public class SpousePage extends javax.swing.JFrame {
         applicantButton.addActionListener(e -> {
             boolean isVisible = dropdownPanel.isVisible();
             dropdownPanel.setVisible(!isVisible);
-            applicantButton.setText("Applicant Records " + (isVisible ? "˅" : "˄"));
-            setActiveButton(applicantButton);
-            
+            applicantButton.setText("Applicant Records " + (isVisible ? "˅" : "˄"));            
             int intDropdownHeight = dropdownPanel.getComponentCount() * 30;
             int intNewY = isVisible ? 200 : 200 + intDropdownHeight;
             
@@ -277,11 +283,144 @@ public class SpousePage extends javax.swing.JFrame {
         sidebarButtons.add(dashboardButton);
         sidebarButtons.add(loanQueueButton);
         
+        
+        // main content
         RoundedPanel contentPanel = new RoundedPanel(40);
         contentPanel.setBounds(240, 70, 1000, 580);
         contentPanel.setBackground(Color.WHITE);
         contentPanel.setLayout(null);
         this.getContentPane().add(contentPanel);
+        
+        JLabel applicationLabel = new JLabel("Spouse");
+        applicationLabel.setForeground(Color.BLACK);
+        applicationLabel.setFont(new Font("SansSerif", Font.BOLD, 25));
+        applicationLabel.setBounds(20, 20, 300, 30);  
+        contentPanel.add(applicationLabel);
+        
+        // search 
+        JTextField searchField = new JTextField();
+        int searchWidth = 200;
+        int searchHeight = 30;
+        int paddingRight = 20;
+        int contentWidth = getWidth() - 240 - 30;
+        searchField.setBounds(contentWidth - searchWidth - paddingRight, 20, searchWidth, searchHeight);
+        searchField.setFont(new Font("SansSerif", Font.PLAIN, 14));
+        contentPanel.add(searchField);
+
+        JButton searchButton = new JButton("Search");
+        searchButton.setBounds(contentWidth - searchWidth - 90 - paddingRight, 20, 80, searchHeight);
+        searchButton.setFont(new Font("SansSerif", Font.PLAIN, 14));
+        searchButton.setBackground(new Color(0x12297D));
+        searchButton.setForeground(Color.WHITE);
+        searchButton.setFocusPainted(false);
+        contentPanel.add(searchButton);
+        
+        // table for data
+        String[] columns = {
+            "spousePagibigMid", "spouseName", "spouseCitizenship", "spouseDOB", 
+            "spouseTin", "spouseOccupation", "spouseBusinessPhone", "employerName", 
+            "spousePosition", "spouseYearsEmployment", "pagibigMid"
+        };
+        
+        DefaultTableModel model = new DefaultTableModel(columns, 0) {
+            public boolean isCellEditable(int row, int column) {
+                return false; 
+            }
+        };
+        
+        JTable table = new JTable(model);
+        table.setShowHorizontalLines(true); 
+        table.setShowVerticalLines(false); 
+        table.setGridColor(Color.LIGHT_GRAY);
+        table.setBorder(BorderFactory.createEmptyBorder()); 
+        table.setIntercellSpacing(new Dimension(0, 1)); 
+        table.setRowHeight(25);
+        table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+
+        
+        table.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable tbl, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+                Component c = super.getTableCellRendererComponent(tbl, value, isSelected, hasFocus, row, column);
+                c.setBackground(Color.WHITE);
+                if (c instanceof JComponent) {
+                    ((JComponent) c).setBorder(BorderFactory.createEmptyBorder()); 
+                }
+                return c;
+            }
+        });
+        
+        JTableHeader tableHeader = table.getTableHeader();
+        tableHeader.setBackground(Color.WHITE);
+        tableHeader.setOpaque(true);
+        tableHeader.setBorder(BorderFactory.createEmptyBorder());
+        tableHeader.setFont(new Font("SansSerif", Font.BOLD, 13));
+        tableHeader.setForeground(Color.BLACK);
+        tableHeader.setReorderingAllowed(false);
+        tableHeader.setResizingAllowed(false); 
+
+        JScrollPane scrollPane = new JScrollPane(table);
+        int contentHeight  = getHeight() - 150 - 65;
+        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        scrollPane.setBounds(20, 60, contentWidth - 40, contentHeight - 120); 
+        scrollPane.setBorder(BorderFactory.createEmptyBorder());
+        scrollPane.getViewport().setBackground(Color.WHITE); 
+        scrollPane.setOpaque(false); 
+        contentPanel.add(scrollPane);
+
+        TableColumnModel columnModel = table.getColumnModel();
+        columnModel.getColumn(0).setPreferredWidth(120);   // spousePagibigMid
+        columnModel.getColumn(1).setPreferredWidth(180);   // spouseName
+        columnModel.getColumn(2).setPreferredWidth(150);   // spouseCitizenship
+        columnModel.getColumn(3).setPreferredWidth(150);   // spouseDOB
+        columnModel.getColumn(4).setPreferredWidth(120);   // spouseTin
+        columnModel.getColumn(5).setPreferredWidth(100);   // spouseOccupation
+        columnModel.getColumn(6).setPreferredWidth(100);   // spouseBusinessPhone
+        columnModel.getColumn(7).setPreferredWidth(150);   // employerName
+        columnModel.getColumn(8).setPreferredWidth(150);   // spousePosition
+        columnModel.getColumn(9).setPreferredWidth(120);   // spouseYearsEmployment
+        columnModel.getColumn(10).setPreferredWidth(160);  // pagibigMid
+
+
+        TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<>(model);
+        table.setRowSorter(sorter);
+        
+        try {
+            Connection conn = DBConnection.getConnection();
+            SpouseService spouseService = new SpouseService(conn);
+            List<Spouse> apps = spouseService.getSpouses();
+            for (Spouse app : apps) {
+                model.addRow(new Object[]{
+                    app.getStrSpousePagibigMid(),
+                    app.getStrSpouseName(),
+                    app.getEnumSpouseCitizenship(),
+                    app.getDtSpouseDOB(),
+                    app.getStrSpouseTin(),
+                    app.getStrSpouseOccupation(),
+                    app.getStrSpouseBusinessPhone(),
+                    app.getEmployerName(),
+                    app.getStrSpousePosition(),
+                    app.getIntSpouseYearsEmployment(),
+                    app.getMemberName()
+                });
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Error loading loan particulars: " + e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "An unexpected error occurred.");
+        }
+
+        searchButton.addActionListener(e -> {
+            String text = searchField.getText().trim();
+            if (text.isEmpty()) {
+                sorter.setRowFilter(null);
+            } else {
+                sorter.setRowFilter(RowFilter.regexFilter("(?i)" + Pattern.quote(text)));
+            }
+        });
         
         
 

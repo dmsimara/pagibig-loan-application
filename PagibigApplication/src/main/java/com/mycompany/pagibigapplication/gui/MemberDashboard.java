@@ -195,7 +195,7 @@ public class MemberDashboard extends javax.swing.JFrame {
         
         applicantButton.addActionListener(e -> {
             setActiveButton(applicantButton);
-            new MemberStatus().setVisible(true);
+            new MemberStatus(authService).setVisible(true);
             this.dispose();
         });
 
@@ -289,7 +289,7 @@ public class MemberDashboard extends javax.swing.JFrame {
         checkStatusBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
         
         checkStatusBtn.addActionListener(e -> {
-            MemberStatus memberStatus = new MemberStatus();
+            MemberStatus memberStatus = new MemberStatus(authService);
             memberStatus.setVisible(true);
             this.dispose();
         });

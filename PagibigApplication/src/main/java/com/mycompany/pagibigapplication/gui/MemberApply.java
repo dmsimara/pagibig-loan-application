@@ -202,7 +202,7 @@ public class MemberApply extends javax.swing.JFrame {
         
         applicantButton.addActionListener(e -> {
             setActiveButton(applicantButton);
-            new MemberStatus().setVisible(true);
+            new MemberStatus(authService).setVisible(true);
             this.dispose();
         });
 

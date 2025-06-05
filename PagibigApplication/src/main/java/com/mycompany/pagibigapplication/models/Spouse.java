@@ -11,8 +11,8 @@ public class Spouse {
         DC,  // Dual Citizen
         FN   // Foreign National
     }
-    private Citizenship enumSpouseCitizenship;
 
+    private Citizenship enumSpouseCitizenship;
     private LocalDate dtSpouseDOB;        
     private String strSpouseTin;             
     private String strSpouseOccupation;  
@@ -22,12 +22,15 @@ public class Spouse {
     private String strSpousePosition;    
     private int intSpouseYearsEmployment; 
 
+    // NEW FIELD for member's name instead of pagibigMid
+    private String memberName;
+
     public Spouse() {
     }
 
     public Spouse(String strSpousePagibigMid, String strSpouseName, Citizenship enumSpouseCitizenship, LocalDate dtSpouseDOB,
                   String strSpouseTin, String strSpouseOccupation, String strSpouseBusinessPhone, int intEmployerId,
-                  String strSpousePosition, int intSpouseYearsEmployment) {
+                  String strSpousePosition, int intSpouseYearsEmployment, String memberName) {
         this.strSpousePagibigMid = strSpousePagibigMid;
         this.strSpouseName = strSpouseName;
         this.enumSpouseCitizenship = enumSpouseCitizenship;
@@ -38,8 +41,8 @@ public class Spouse {
         this.intEmployerId = intEmployerId;
         this.strSpousePosition = strSpousePosition;
         this.intSpouseYearsEmployment = intSpouseYearsEmployment;
+        this.memberName = memberName;
     }
-
 
     public String getStrSpousePagibigMid() {
         return strSpousePagibigMid;
@@ -120,12 +123,20 @@ public class Spouse {
     public void setIntSpouseYearsEmployment(int intSpouseYearsEmployment) {
         this.intSpouseYearsEmployment = intSpouseYearsEmployment;
     }
-    
+
     public String getEmployerName() {
         return strEmployerName;
     }
 
     public void setEmployerName(String strEmployerName) {
         this.strEmployerName = strEmployerName;
+    }
+
+    public String getMemberName() {
+        return memberName;
+    }
+
+    public void setMemberName(String memberName) {
+        this.memberName = memberName;
     }
 }

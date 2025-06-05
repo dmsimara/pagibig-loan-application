@@ -23,8 +23,19 @@ import java.sql.Connection;
 import com.mycompany.pagibigapplication.services.AuthService;
 import com.mycompany.pagibigapplication.gui.RoundedPanel;
 import com.mycompany.pagibigapplication.db.DBConnection;
+import com.mycompany.pagibigapplication.models.Application;
 import com.mycompany.pagibigapplication.models.Member;
+import com.mycompany.pagibigapplication.services.MemberApplication;
 import com.mycompany.pagibigapplication.services.MemberService;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.sql.SQLException;
+import java.util.regex.Pattern;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.JTableHeader;
+import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableColumnModel;
+import javax.swing.table.TableRowSorter;
 
 public class LoanQueue extends javax.swing.JFrame {
 
@@ -254,9 +265,7 @@ public class LoanQueue extends javax.swing.JFrame {
         applicantButton.addActionListener(e -> {
             boolean isVisible = dropdownPanel.isVisible();
             dropdownPanel.setVisible(!isVisible);
-            applicantButton.setText("Applicant Records " + (isVisible ? "˅" : "˄"));
-            setActiveButton(applicantButton);
-            
+            applicantButton.setText("Applicant Records " + (isVisible ? "˅" : "˄"));            
             int intDropdownHeight = dropdownPanel.getComponentCount() * 30;
             int intNewY = isVisible ? 200 : 200 + intDropdownHeight;
             
@@ -289,42 +298,220 @@ public class LoanQueue extends javax.swing.JFrame {
         contentPanel.setLayout(null);
         this.getContentPane().add(contentPanel);
         
+        JLabel applicationLabel = new JLabel("Application List");
+        applicationLabel.setForeground(Color.BLACK);
+        applicationLabel.setFont(new Font("SansSerif", Font.BOLD, 25));
+        applicationLabel.setBounds(20, 20, 300, 30);  
+        contentPanel.add(applicationLabel);
+        
+        // search 
+        JTextField searchField = new JTextField();
+        int searchWidth = 200;
+        int searchHeight = 30;
+        int paddingRight = 20;
+        int contentWidth = getWidth() - 240 - 30;
+        searchField.setBounds(contentWidth - searchWidth - paddingRight, 20, searchWidth, searchHeight);
+        searchField.setFont(new Font("SansSerif", Font.PLAIN, 14));
+        contentPanel.add(searchField);
+
+        JButton searchButton = new JButton("Search");
+        searchButton.setBounds(contentWidth - searchWidth - 90 - paddingRight, 20, 80, searchHeight);
+        searchButton.setFont(new Font("SansSerif", Font.PLAIN, 14));
+        searchButton.setBackground(new Color(0x12297D));
+        searchButton.setForeground(Color.WHITE);
+        searchButton.setFocusPainted(false);
+        contentPanel.add(searchButton);
+        
         // table for data
-        String[] objNames = {"Application No.", "Member Name", "Date Submitted", "Pagibig MID", "Record", "Status"};
-        DefaultTableModel tblModel = new DefaultTableModel(objNames, 0);
+        String[] columns = {
+            "Application No.", "Member Name", "Date Submitted", "Pagibig MID", "Record", "Status"
+        };
+        
+        DefaultTableModel model = new DefaultTableModel(columns, 0) {
+            public boolean isCellEditable(int row, int column) {
+                return column == 4; 
+            }
+        };
+        
+        JTable table = new JTable(model);
+        table.setShowHorizontalLines(true); 
+        table.setShowVerticalLines(false); 
+        table.setGridColor(Color.LIGHT_GRAY);
+        table.setBorder(BorderFactory.createEmptyBorder()); 
+        table.setIntercellSpacing(new Dimension(0, 1)); 
+        table.setRowHeight(25);
+        
+        table.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable tbl, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+                Component c = super.getTableCellRendererComponent(tbl, value, isSelected, hasFocus, row, column);
+                c.setBackground(Color.WHITE);
+                if (c instanceof JComponent) {
+                    ((JComponent) c).setBorder(BorderFactory.createEmptyBorder()); 
+                }
+                return c;
+            }
+        });
+        
+        table.getColumn("Status").setCellRenderer(new DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value,
+                boolean isSelected, boolean hasFocus, int row, int column) {
+
+                JLabel label = new JLabel(value != null ? value.toString() : "");
+                label.setOpaque(true);
+                label.setHorizontalAlignment(SwingConstants.CENTER);
+                label.setFont(new Font("SansSerif", Font.BOLD, 12));
+                label.setBorder(BorderFactory.createLineBorder(Color.GRAY, 1));
+                label.setPreferredSize(new Dimension(100, 25));
+
+                String status = value != null ? value.toString() : "";
+
+                switch (status) {
+                    case "Approved":
+                        label.setBackground(new Color(0x16C09861, true)); 
+                        label.setForeground(new Color(0x00B087));
+                        label.setBorder(BorderFactory.createLineBorder(new Color(0x00B087)));
+                        break;
+
+                    case "Pending":
+                        label.setBackground(new Color(0xFFF5CC)); 
+                        label.setForeground(new Color(0xDFC204));
+                        label.setBorder(BorderFactory.createLineBorder(new Color(0xDFC204)));
+                        break;
+
+                    case "Rejected":
+                        label.setBackground(new Color(0xFFC5C5));
+                        label.setForeground(new Color(0xDF0404));
+                        label.setBorder(BorderFactory.createLineBorder(new Color(0xDF0404)));
+                        break;
+
+                    default:
+                        label.setBackground(Color.WHITE);
+                        label.setForeground(Color.BLACK);
+                        label.setBorder(BorderFactory.createEmptyBorder());
+                        break;
+                }
+
+                return label;
+            }
+        });
+        
+        table.getColumn("Record").setCellRenderer(new TableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value,
+                boolean isSelected, boolean hasFocus, int row, int column) {
+
+                JButton button = new JButton("View Record");
+                button.setForeground(Color.WHITE);
+                button.setBackground(new Color(0x12297D));
+                button.setFocusPainted(false);
+                button.setBorderPainted(false);
+                button.setFont(new Font("SansSerif", Font.PLAIN, 12));
+                button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+                return button;
+            }
+        });
+
+        table.getColumn("Record").setCellEditor(new DefaultCellEditor(new JCheckBox()) {
+            JButton button = new JButton("View Record");
+
+            {
+                button.setForeground(Color.WHITE);
+                button.setBackground(new Color(0x12297D));
+                button.setFocusPainted(false);
+                button.setBorderPainted(false);
+                button.setFont(new Font("SansSerif", Font.PLAIN, 12));
+                button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+                button.addMouseListener(new MouseAdapter() {
+                    @Override
+                    public void mouseEntered(MouseEvent e) {
+                        button.setBackground(new Color(0x1F41BB));
+                    }
+
+                    @Override
+                    public void mouseExited(MouseEvent e) {
+                        button.setBackground(new Color(0x12297D));
+                    }
+                }); 
+
+                button.addActionListener(new ActionListener() {
+                    public void actionPerformed(ActionEvent e) {
+                        System.out.println("View Record button clicked!");
+                        fireEditingStopped();
+                    }
+                });
+            }
+
+            @Override
+            public Component getTableCellEditorComponent(JTable table, Object value,
+                boolean isSelected, int row, int column) {
+                return button;
+            }
+
+            @Override
+            public Object getCellEditorValue() {
+                return "View Record";
+            }
+        });
+        
+        JTableHeader tableHeader = table.getTableHeader();
+        tableHeader.setBackground(Color.WHITE);
+        tableHeader.setOpaque(true);
+        tableHeader.setBorder(BorderFactory.createEmptyBorder());
+        tableHeader.setFont(new Font("SansSerif", Font.BOLD, 13));
+        tableHeader.setForeground(Color.BLACK);
+        tableHeader.setReorderingAllowed(false);
+        tableHeader.setResizingAllowed(false); 
+
+        JScrollPane scrollPane = new JScrollPane(table);
+        int contentHeight  = getHeight() - 150 - 65;
+        scrollPane.setBounds(20, 60, contentWidth - 40, contentHeight - 120); 
+        scrollPane.setBorder(BorderFactory.createEmptyBorder());
+        scrollPane.getViewport().setBackground(Color.WHITE); 
+        scrollPane.setOpaque(false); 
+        contentPanel.add(scrollPane);
+
+        TableColumnModel columnModel = table.getColumnModel();
+        columnModel.getColumn(0).setPreferredWidth(100);  
+        columnModel.getColumn(1).setPreferredWidth(200);  
+
+        TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<>(model);
+        table.setRowSorter(sorter);
         
         try {
             Connection conn = DBConnection.getConnection();
-            MemberService memberService = new MemberService(conn);
-            List<Member> members = memberService.getPagibigMidAndName();
-            
-            String[] objDates = {"2024-06-20", "2024-06-22", "2024-06-25"};
-            int intIndex = 0;
-            int intAppNo = 1;
-            
-            for (Member m : members) {
-                Object[] objData = {
-                    intAppNo++,
-                    m.getName(),
-                    objDates[intIndex++],
-                    m.getPagibigMid(),
-                    "",
-                    "Approved"
-                };
-                
-                tblModel.addRow(objData);
+            MemberApplication memberAppService = new MemberApplication(conn);
+            List<Application> apps = memberAppService.getAllApplications();
+            for (Application app : apps) {
+                model.addRow(new Object[]{
+                    app.getApplicationNo(),
+                    app.getMemberName(),
+                    app.getDateSubmitted(),
+                    app.getPagibigMid(),
+                    "", 
+                    app.getStatus()
+                });
             }
-        } catch(Exception e) {
-            JOptionPane.showMessageDialog(this, "Error loading member data: " + e.getMessage());
+        } catch (SQLException e) {
             e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Error loading applications: " + e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "An unexpected error occurred.");
         }
+
+        searchButton.addActionListener(e -> {
+            String text = searchField.getText().trim();
+            if (text.isEmpty()) {
+                sorter.setRowFilter(null);
+            } else {
+                sorter.setRowFilter(RowFilter.regexFilter("(?i)" + Pattern.quote(text)));
+            }
+        });
         
-        JTable table = new JTable(tblModel);
-        JScrollPane scrollPane = new JScrollPane(table);
-        scrollPane.setBounds(20, 20, 960, 500);
-        contentPanel.add(scrollPane);
         
-        // code for table ends here
 
         setActiveButton(loanQueueButton);
 

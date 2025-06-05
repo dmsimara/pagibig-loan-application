@@ -246,9 +246,7 @@ public class AdminDashboard extends javax.swing.JFrame {
         applicantButton.addActionListener(e -> {
             boolean isVisible = dropdownPanel.isVisible();
             dropdownPanel.setVisible(!isVisible);
-            applicantButton.setText("Applicant Records " + (isVisible ? "˅" : "˄"));
-            setActiveButton(applicantButton);
-            
+            applicantButton.setText("Applicant Records " + (isVisible ? "˅" : "˄"));            
             int intDropdownHeight = dropdownPanel.getComponentCount() * 30;
             int intNewY = isVisible ? 200 : 200 + intDropdownHeight;
             

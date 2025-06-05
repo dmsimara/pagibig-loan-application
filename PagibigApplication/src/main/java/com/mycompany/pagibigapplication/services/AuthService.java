@@ -7,7 +7,7 @@ public class AuthService {
     
     private static final String strAdminUsername = "admin1";
     private static final String strAdminPassword = "thisisadmin1";
-    private static final String strMemberUsername = "102345678910";
+    private static final String strMemberUsername = "123456789012";
     private static final String strMemberPassword = "samplemember1";
     
     private static String strCurrentUser = null;
