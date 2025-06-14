@@ -212,7 +212,7 @@ public class MemberStatus extends javax.swing.JFrame {
 
         loanQueueButton.addActionListener(e -> {
             setActiveButton(loanQueueButton);
-            new MemberApply(authService).setVisible(true);
+            new MultiStepForm().setVisible(true);
             this.dispose();
         });
         

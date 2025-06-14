@@ -21,8 +21,7 @@ public class Spouse {
     private String strEmployerName;
     private String strSpousePosition;    
     private int intSpouseYearsEmployment; 
-
-    // NEW FIELD for member's name instead of pagibigMid
+    private String strPagibigMid;
     private String memberName;
 
     public Spouse() {
@@ -30,7 +29,7 @@ public class Spouse {
 
     public Spouse(String strSpousePagibigMid, String strSpouseName, Citizenship enumSpouseCitizenship, LocalDate dtSpouseDOB,
                   String strSpouseTin, String strSpouseOccupation, String strSpouseBusinessPhone, int intEmployerId,
-                  String strSpousePosition, int intSpouseYearsEmployment, String memberName) {
+                  String strSpousePosition, int intSpouseYearsEmployment, String strPagibigMid, String memberName) {
         this.strSpousePagibigMid = strSpousePagibigMid;
         this.strSpouseName = strSpouseName;
         this.enumSpouseCitizenship = enumSpouseCitizenship;
@@ -41,6 +40,7 @@ public class Spouse {
         this.intEmployerId = intEmployerId;
         this.strSpousePosition = strSpousePosition;
         this.intSpouseYearsEmployment = intSpouseYearsEmployment;
+        this.strPagibigMid = strPagibigMid;
         this.memberName = memberName;
     }
 
@@ -130,6 +130,14 @@ public class Spouse {
 
     public void setEmployerName(String strEmployerName) {
         this.strEmployerName = strEmployerName;
+    }
+    
+    public String getPagibigMid() {
+        return strPagibigMid;
+    }
+
+    public void setPagibigMid(String strPagibigMid) {
+        this.strPagibigMid = strPagibigMid;
     }
 
     public String getMemberName() {

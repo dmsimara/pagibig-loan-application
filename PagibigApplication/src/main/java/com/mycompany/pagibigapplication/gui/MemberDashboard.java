@@ -189,7 +189,7 @@ public class MemberDashboard extends javax.swing.JFrame {
 
         loanQueueButton.addActionListener(e -> {
             setActiveButton(loanQueueButton);
-            new MemberApply(authService).setVisible(true);
+            new MultiStepForm().setVisible(true);
             this.dispose();
         });
         
@@ -270,7 +270,7 @@ public class MemberDashboard extends javax.swing.JFrame {
         applyNowButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
         
         applyNowButton.addActionListener(e -> {
-            MemberApply memberApply = new MemberApply(authService);
+            MultiStepForm memberApply = new MultiStepForm();
             memberApply.setVisible(true);
             this.dispose();
         });
