@@ -11,13 +11,16 @@ public class EmployerDaoImpl implements EmployerDao {
     private static final String INSERT_SQL = "INSERT INTO employer (employerPhoneDirect, employerPhoneTrunk, employerEmail, employerName, employerAddress, industry, preferredContactTime) VALUES (?, ?, ?, ?, ?, ?, ?)";
     private static final String UPDATE_SQL = "UPDATE employer SET employerPhoneDirect = ?, employerPhoneTrunk = ?, employerEmail = ?, employerName = ?, employerAddress = ?, industry = ?, preferredContactTime = ? WHERE employerId = ?";
     private static final String SELECT_BY_EMPLOYER_ID_SQL = "SELECT employerId, employerPhoneDirect, employerPhoneTrunk, employerEmail, employerName, employerAddress, industry, preferredContactTime FROM employer WHERE employerId = ?";
+    private static final String SELECT_BY_EMPLOYER_NAME_SQL = "SELECT employerId FROM employer WHERE LOWER(employerName) = LOWER(?)";
 
     @Override
     public void saveEmployer(Employer employer) throws Exception {
         try (Connection conn = DBConnection.getConnection()) {
             conn.setAutoCommit(false);
             try {
-                if (existsByEmployerId(conn, employer.getEmployerId())) {
+                Integer existingEmployerId = findEmployerIdByName(conn, employer.getEmployerName());
+                if (existingEmployerId != null) {
+                    employer.setEmployerId(existingEmployerId);
                     updateEmployer(conn, employer);
                 } else {
                     insertEmployer(conn, employer);
@@ -54,13 +57,19 @@ public class EmployerDaoImpl implements EmployerDao {
         return employer;
     }
 
-    private boolean existsByEmployerId(Connection conn, int employerId) throws SQLException {
-        try (PreparedStatement stmt = conn.prepareStatement(SELECT_BY_EMPLOYER_ID_SQL)) {
-            stmt.setInt(1, employerId);
+    private Integer findEmployerIdByName(Connection conn, String employerName) throws SQLException {
+        if (employerName == null || employerName.trim().isEmpty()) {
+            return null;
+        }
+        try (PreparedStatement stmt = conn.prepareStatement(SELECT_BY_EMPLOYER_NAME_SQL)) {
+            stmt.setString(1, employerName.trim());
             try (ResultSet rs = stmt.executeQuery()) {
-                return rs.next();
+                if (rs.next()) {
+                    return rs.getInt("employerId");
+                }
             }
         }
+        return null;
     }
 
     private void insertEmployer(Connection conn, Employer employer) throws SQLException {

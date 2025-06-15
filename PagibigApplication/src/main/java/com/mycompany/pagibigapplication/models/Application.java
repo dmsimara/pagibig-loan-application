@@ -1,4 +1,3 @@
-
 package com.mycompany.pagibigapplication.models;
 
 import java.time.LocalDate;
@@ -15,7 +14,7 @@ public class Application {
     }
     private Status enumStatus;
     
-    private String strPagbigMid;
+    private String strPagibigMid;
     
     public Application() {
     
@@ -26,7 +25,7 @@ public class Application {
         this.strMemberName = strMemberName;
         this.dtDateSubmitted = dtDateSubmitted;
         this.enumStatus = enumStatus;
-        this.strPagbigMid = strPagibigMid;
+        this.strPagibigMid = strPagibigMid;
     }
     
     public int getApplicationNo() {
@@ -46,11 +45,11 @@ public class Application {
     }
     
     public String getPagibigMid() {
-        return strPagbigMid;
+        return strPagibigMid;
     }
     
-    public void setPagibigMid(String strPagbigMid) {
-        this.strPagbigMid = strPagbigMid;
+    public void setPagibigMid(String strPagibigMid) {
+        this.strPagibigMid = strPagibigMid;
     }
     
     public LocalDate getDateSubmitted() {

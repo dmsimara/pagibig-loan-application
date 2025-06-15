@@ -1,4 +1,3 @@
-
 package com.mycompany.pagibigapplication.gui;
 
 import com.mycompany.pagibigapplication.services.ApplicationData;
@@ -65,7 +64,7 @@ public class Step4Panel extends javax.swing.JPanel {
         this.add(lblSpousePagibigMid, gbc);
         tfSpousePagibigMid = new JTextField(15);
         tfSpousePagibigMid.setFont(new Font("SansSerif", Font.PLAIN, 16));
-        String spousePagibigMid = appData.getSpouse().getPagibigMid();
+        String spousePagibigMid = appData.getSpouse().getStrSpousePagibigMid();
         tfSpousePagibigMid.setText(spousePagibigMid != null ? spousePagibigMid : "");
         gbc.gridx = 1;
         this.add(tfSpousePagibigMid, gbc);
@@ -220,7 +219,13 @@ public class Step4Panel extends javax.swing.JPanel {
             btnNext.setEnabled(false);
             Spouse spouse = appData.getSpouse();
 
-            spouse.setPagibigMid(tfSpousePagibigMid.getText());
+            if (tfSpousePagibigMid.getText().trim().isEmpty()) {
+                JOptionPane.showMessageDialog(Step4Panel.this, "Spouse Pag-IBIG MID cannot be empty.", "Validation Error", JOptionPane.ERROR_MESSAGE);
+                btnNext.setEnabled(true);
+                return;
+            }
+            spouse.setStrSpousePagibigMid(tfSpousePagibigMid.getText().trim());
+
             spouse.setStrSpouseName(tfSpouseName.getText());
 
             String citizenship = (String) cbSpouseCitizenship.getSelectedItem();
@@ -246,7 +251,6 @@ public class Step4Panel extends javax.swing.JPanel {
             spouse.setStrSpouseOccupation(tfSpouseOccupation.getText());
             spouse.setStrSpouseBusinessPhone(tfSpouseBusinessPhone.getText());
 
-
             spouse.setEmployerName(tfEmployerName.getText());
             spouse.setStrSpousePosition(tfSpousePosition.getText());
 
@@ -258,8 +262,11 @@ public class Step4Panel extends javax.swing.JPanel {
                 return;
             }
 
+            // Set member's PagibigMid as foreign key in spouse
+            spouse.setPagibigMid(appData.getMember().getPagibigMid());
+
             System.out.println("Saved Spouse Data:");
-            System.out.println("Pag-IBIG MID: " + spouse.getPagibigMid());
+            System.out.println("Pag-IBIG MID: " + spouse.getStrSpousePagibigMid());
             System.out.println("Name: " + spouse.getStrSpouseName());
             System.out.println("Citizenship: " + spouse.getEnumSpouseCitizenship());
             System.out.println("Date of Birth: " + spouse.getDtSpouseDOB());

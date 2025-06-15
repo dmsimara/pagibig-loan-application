@@ -1,4 +1,3 @@
-
 package com.mycompany.pagibigapplication.gui;
 
 import javax.swing.*;
@@ -432,6 +431,28 @@ public class Step3Panel extends javax.swing.JPanel {
 
         collateral.setBoolIsOffsiteCollateral(chkIsOffsiteCollateral.isSelected());
         collateral.setStrOffsiteCollateralReason(tfOffsiteCollateralReason.getText().trim());
+
+        // Preserve housing account no from step1
+        collateral.setStrHousingAccountNo(appData.getLoan().getHousingAccountNo());
+
+        System.out.println("Saving Collateral Data:");
+        System.out.println("TCT/OCT/CCT No: " + collateral.getIntTctOctCctNo());
+        System.out.println("Primary Property Location: " + collateral.getStrPrimaryPropertyLocation());
+        System.out.println("Property Type: " + collateral.getEnumPropertyType());
+        System.out.println("Developer Title Holder: " + collateral.getStrDeveloperTitleHolder());
+        System.out.println("Description Of Improvements: " + collateral.getEnumDescriptionOfImprovements());
+        System.out.println("Tax Declaration No: " + collateral.getStrTaxDeclarationNo());
+        System.out.println("Lot/Unit No: " + collateral.getStrLotUnitNo());
+        System.out.println("Block/Building No: " + collateral.getStrBlockBuildingNo());
+        System.out.println("Number Of Storeys: " + collateral.getIntNumberOfStoreys());
+        System.out.println("Is Property Mortgaged: " + collateral.isBoolIsPropertyMortgaged());
+        System.out.println("Land Area (sqm): " + collateral.getBdLandAreaSqm());
+        System.out.println("Floor Area (sqm): " + collateral.getBdFloorAreaSqm());
+        System.out.println("Age Of House: " + collateral.getIntAgeOfHouse());
+        System.out.println("Total Floor Area (sqm): " + collateral.getBdTotalFloorAreaSqm());
+        System.out.println("Is Offsite Collateral: " + collateral.isBoolIsOffsiteCollateral());
+        System.out.println("Offsite Collateral Reason: " + collateral.getStrOffsiteCollateralReason());
+        System.out.println("Housing Account No: " + collateral.getStrHousingAccountNo());
     }
 
 
@@ -539,8 +560,7 @@ public class Step3Panel extends javax.swing.JPanel {
             }
         });
     }
-
-
+    
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {

@@ -11,7 +11,13 @@ import java.time.LocalDate;
 public class MemberDaoImpl implements MemberDao {
 
     private static final String INSERT_SQL = "INSERT INTO member (pagibigMid, name, citizenship, dateOfBirth, sex, maritalStatus, numberOfDependents, presentHomeAddress, permanentHomeAddress, homePhone, emailAddress, alternateMailingAddress, sssGsisNo, tin, occupation, homeOwnership, monthlyRent, yearsOfStayAddress, employerId, yearsEmployment, positionDepartment, cellPhone) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-    private static final String UPDATE_SQL = "UPDATE member SET name = ?, citizenship = ?, dateOfBirth = ?, sex = ?, maritalStatus = ?, numberOfDependents = ?, presentHomeAddress = ?, permanentHomeAddress = ?, homePhone = ?, emailAddress = ?, alternateMailingAddress = ?, sssGsisNo = ?, tin = ?, occupation = ?, homeOwnership = ?, monthlyRent = ?, yearsOfStayAddress = ?, employerId = ?, yearsEmployment = ?, positionDepartment = ?, cellPhone = ? WHERE pagibigMid = ?";
+    
+    private static final String UPDATE_SQL = 
+        "UPDATE member SET name = ?, citizenship = ?, dateOfBirth = ?, sex = ?, maritalStatus = ?, numberOfDependents = ?, " +
+        "presentHomeAddress = ?, permanentHomeAddress = ?, homePhone = ?, emailAddress = ?, alternateMailingAddress = ?, " +
+        "sssGsisNo = ?, tin = ?, occupation = ?, homeOwnership = ?, monthlyRent = ?, yearsOfStayAddress = ?, employerId = ?, " +
+        "yearsEmployment = ?, positionDepartment = ?, cellPhone = ? WHERE pagibigMid = ?";
+
     private static final String SELECT_EMPLOYER_BY_NAME = "SELECT employerId FROM Employer WHERE LOWER(employerName) = LOWER(?)";
     private static final String INSERT_EMPLOYER = "INSERT INTO Employer (employerName, employerAddress) VALUES (?, ?)";
 
@@ -52,7 +58,7 @@ public class MemberDaoImpl implements MemberDao {
         }
         try (PreparedStatement insertStmt = conn.prepareStatement(INSERT_EMPLOYER, Statement.RETURN_GENERATED_KEYS)) {
             insertStmt.setString(1, employerName.trim());
-            insertStmt.setString(2, ""); // Provide a default or empty value for employerAddress
+            insertStmt.setString(2, ""); // default employerAddress
             int affectedRows = insertStmt.executeUpdate();
             if (affectedRows == 0) {
                 throw new SQLException("Inserting employer failed, no rows affected.");
@@ -69,7 +75,7 @@ public class MemberDaoImpl implements MemberDao {
 
     private boolean updateMember(Connection conn, Member member, Integer employerId) throws SQLException {
         try (PreparedStatement updateStmt = conn.prepareStatement(UPDATE_SQL)) {
-            setMemberParameters(updateStmt, member, employerId);
+            setMemberParameters(updateStmt, member, employerId, 1, false); // Don't include pagibigMid
             updateStmt.setString(22, member.getPagibigMid());
             int affectedRows = updateStmt.executeUpdate();
             return affectedRows > 0;
@@ -78,34 +84,39 @@ public class MemberDaoImpl implements MemberDao {
 
     private void insertMember(Connection conn, Member member, Integer employerId) throws SQLException {
         try (PreparedStatement insertStmt = conn.prepareStatement(INSERT_SQL)) {
-            setMemberParameters(insertStmt, member, employerId);
+            setMemberParameters(insertStmt, member, employerId, 1, true);
             insertStmt.executeUpdate();
         }
     }
 
-    private void setMemberParameters(PreparedStatement stmt, Member member, Integer employerId) throws SQLException {
-        stmt.setString(1, member.getPagibigMid());
-        stmt.setString(2, member.getName());
-        stmt.setString(3, member.getCitizenship() != null ? member.getCitizenship().name() : null);
-        stmt.setDate(4, member.getDateOfBirth() != null ? Date.valueOf(member.getDateOfBirth()) : null);
-        stmt.setString(5, member.getSex() != null ? member.getSex().name() : null);
-        stmt.setString(6, member.getMaritalStatus() != null ? member.getMaritalStatus().name() : null);
-        stmt.setInt(7, member.getNumberOfDependents());
-        stmt.setString(8, member.getPresentHomeAddress());
-        stmt.setString(9, member.getPermanentHomeAddress());
-        stmt.setString(10, member.getHomePhone());
-        stmt.setString(11, member.getEmailAddress());
-        stmt.setString(12, member.getAlternateMailingAddress());
-        stmt.setString(13, member.getSssGsisNo());
-        stmt.setString(14, member.getTin());
-        stmt.setString(15, member.getOccupation());
-        stmt.setString(16, member.getHomeOwnership());
-        stmt.setBigDecimal(17, member.getMonthlyRent() != null ? member.getMonthlyRent() : BigDecimal.ZERO);
-        stmt.setInt(18, member.getYearsOfStayAddress());
-        stmt.setObject(19, employerId, Types.INTEGER);
-        stmt.setInt(20, member.getYearsEmployment());
-        stmt.setString(21, member.getPositionDepartment());
+    private void setMemberParameters(PreparedStatement stmt, Member member, Integer employerId, int startIndex, boolean includePagibigMid) throws SQLException {
+        if (includePagibigMid) {
+            stmt.setString(startIndex++, member.getPagibigMid());
+        }
+
+        stmt.setString(startIndex++, member.getName());
+        stmt.setString(startIndex++, member.getCitizenship() != null ? member.getCitizenship().name() : null);
+        stmt.setDate(startIndex++, member.getDateOfBirth() != null ? Date.valueOf(member.getDateOfBirth()) : null);
+        stmt.setString(startIndex++, member.getSex() != null ? member.getSex().name() : null);
+        stmt.setString(startIndex++, member.getMaritalStatus() != null ? member.getMaritalStatus().name() : null);
+        stmt.setInt(startIndex++, member.getNumberOfDependents());
+        stmt.setString(startIndex++, member.getPresentHomeAddress());
+        stmt.setString(startIndex++, member.getPermanentHomeAddress());
+        stmt.setString(startIndex++, member.getHomePhone());
+        stmt.setString(startIndex++, member.getEmailAddress());
+        stmt.setString(startIndex++, member.getAlternateMailingAddress());
+        stmt.setString(startIndex++, member.getSssGsisNo());
+        stmt.setString(startIndex++, member.getTin());
+        stmt.setString(startIndex++, member.getOccupation());
+        stmt.setString(startIndex++, member.getHomeOwnership());
+        stmt.setBigDecimal(startIndex++, member.getMonthlyRent() != null ? member.getMonthlyRent() : BigDecimal.ZERO);
+        stmt.setInt(startIndex++, member.getYearsOfStayAddress());
+        stmt.setObject(startIndex++, employerId, Types.INTEGER);
+        stmt.setInt(startIndex++, member.getYearsEmployment());
+        stmt.setString(startIndex++, member.getPositionDepartment());
+        stmt.setString(startIndex++, member.getCellPhone());
     }
+
 
     @Override
     public Member getMemberByPagibigMid(String pagibigMid) throws Exception {

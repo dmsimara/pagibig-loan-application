@@ -13,7 +13,10 @@ import java.sql.SQLException;
 public class CollateralDaoImpl implements CollateralDao {
 
     private static final String INSERT_SQL = "INSERT INTO collateral (tctOctCctNo, primaryPropertyLocation, propertyType, developerTitleHolder, descriptionOfImprovements, taxDeclarationNo, lotUnitNo, blockBuildingNo, numberOfStoreys, isPropertyMortgaged, landAreaSqm, floorAreaSqm, ageOfHouse, totalFloorAreaSqm, isOffsiteCollateral, offsiteCollateralReason, housingAccountNo) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-    private static final String UPDATE_SQL = "UPDATE collateral SET primaryPropertyLocation = ?, propertyType = ?, developerTitleHolder = ?, descriptionOfImprovements = ?, taxDeclarationNo = ?, lotUnitNo = ?, blockBuildingNo = ?, numberOfStoreys = ?, isPropertyMortgaged = ?, landAreaSqm = ?, floorAreaSqm = ?, ageOfHouse = ?, totalFloorAreaSqm = ?, isOffsiteCollateral = ?, offsiteCollateralReason = ?, housingAccountNo = ? WHERE tctOctCctNo = ?";
+    
+    // Remove housingAccountNo from UPDATE statement to prevent updates to it
+    private static final String UPDATE_SQL = "UPDATE collateral SET primaryPropertyLocation = ?, propertyType = ?, developerTitleHolder = ?, descriptionOfImprovements = ?, taxDeclarationNo = ?, lotUnitNo = ?, blockBuildingNo = ?, numberOfStoreys = ?, isPropertyMortgaged = ?, landAreaSqm = ?, floorAreaSqm = ?, ageOfHouse = ?, totalFloorAreaSqm = ?, isOffsiteCollateral = ?, offsiteCollateralReason = ? WHERE tctOctCctNo = ?";
+    
     private static final String SELECT_BY_TCT_OCT_CCT_NO_SQL = "SELECT tctOctCctNo, primaryPropertyLocation, propertyType, developerTitleHolder, descriptionOfImprovements, taxDeclarationNo, lotUnitNo, blockBuildingNo, numberOfStoreys, isPropertyMortgaged, landAreaSqm, floorAreaSqm, ageOfHouse, totalFloorAreaSqm, isOffsiteCollateral, offsiteCollateralReason, housingAccountNo FROM collateral WHERE tctOctCctNo = ?";
 
     @Override
@@ -35,8 +38,11 @@ public class CollateralDaoImpl implements CollateralDao {
                 updateStmt.setBigDecimal(13, collateral.getBdTotalFloorAreaSqm());
                 updateStmt.setBoolean(14, collateral.isBoolIsOffsiteCollateral());
                 updateStmt.setString(15, collateral.getStrOffsiteCollateralReason());
-                updateStmt.setString(16, collateral.getStrHousingAccountNo());
-                updateStmt.setString(17, collateral.getIntTctOctCctNo());
+                updateStmt.setString(16, collateral.getIntTctOctCctNo());
+
+                System.out.println("Attempting to UPDATE collateral record with the following values:");
+                System.out.println("TCT/OCT/CCT No: " + collateral.getIntTctOctCctNo());
+                System.out.println("Housing Account No (not updated): " + collateral.getStrHousingAccountNo());
 
                 int affectedRows = updateStmt.executeUpdate();
                 if (affectedRows == 0) {
@@ -109,3 +115,4 @@ public class CollateralDaoImpl implements CollateralDao {
         return collateral;
     }
 }
+

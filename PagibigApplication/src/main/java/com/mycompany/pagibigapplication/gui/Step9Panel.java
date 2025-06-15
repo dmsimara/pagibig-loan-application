@@ -4,6 +4,7 @@ import com.mycompany.pagibigapplication.dao.*;
 import com.mycompany.pagibigapplication.dao.impl.*;
 import com.mycompany.pagibigapplication.models.*;
 import com.mycompany.pagibigapplication.services.ApplicationData;
+import com.mycompany.pagibigapplication.services.AuthService;
 
 import javax.swing.*;
 import java.awt.*;
@@ -12,6 +13,7 @@ public class Step9Panel extends javax.swing.JPanel {
 
     private final MultiStepForm parent;
     private final ApplicationData appData;
+    private final AuthService authService = null;
 
     private JButton btnSubmit;
     private JButton btnBack;
@@ -128,14 +130,26 @@ public class Step9Panel extends javax.swing.JPanel {
                 realEstateDao.saveRealEstates(appData.getRealEstateList());
                 outstandingCreditsDao.saveOutstandingCredits(appData.getCreditsList());
                 employerDao.saveEmployer(appData.getEmployer());
+                
+                // Save application tracker record
+                com.mycompany.pagibigapplication.dao.ApplicationDao applicationDao = new com.mycompany.pagibigapplication.dao.impl.ApplicationDaoImpl();
+                com.mycompany.pagibigapplication.models.Application application = new com.mycompany.pagibigapplication.models.Application();
+                application.setPagibigMid(appData.getMember().getPagibigMid());
+                application.setDateSubmitted(java.time.LocalDate.now());
+                application.setStatus(com.mycompany.pagibigapplication.models.Application.Status.Pending);
+                applicationDao.saveApplication(application);
 
                 JOptionPane.showMessageDialog(this, "Application submitted successfully!", "Submission", JOptionPane.INFORMATION_MESSAGE);
-                parent.nextStep();
+                JFrame topFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
+                topFrame.dispose();
+                
+                new MemberDashboard(authService).setVisible(true);
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(this, "Error submitting application: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
                 ex.printStackTrace();
             }
         });
+
 
         btnBack.addActionListener(e -> parent.previousStep());
     }
