@@ -10,13 +10,14 @@ public class LoanApplication {
     private String strRepricingPeriod;
     private String strModeOfPayment;
     private String strPagibigMid;
+    private int intApplicationNo;
 
     public LoanApplication() {
     }
 
     public LoanApplication(String strHousingAccountNo, String strPurposeOfLoan, boolean bHasExistingApplication,
                            String strHousingApplicationNo, int intLoanAmount, String strLoanTerm,
-                           String strRepricingPeriod, String strModeOfPayment, String strPagibigMid) {
+                           String strRepricingPeriod, String strModeOfPayment, String strPagibigMid, int intApplicationNo) {
         this.strHousingAccountNo = strHousingAccountNo;
         this.strPurposeOfLoan = strPurposeOfLoan;
         this.bHasExistingApplication = bHasExistingApplication;
@@ -26,6 +27,7 @@ public class LoanApplication {
         this.strRepricingPeriod = strRepricingPeriod;
         this.strModeOfPayment = strModeOfPayment;
         this.strPagibigMid = strPagibigMid;
+        this.intApplicationNo = intApplicationNo;
     }
 
     // Getters and setters
@@ -100,6 +102,14 @@ public class LoanApplication {
 
     public void setPagibigMid(String strPagibigMid) {
         this.strPagibigMid = strPagibigMid;
+    }
+    
+    public int getIntApplicationNo() {
+        return intApplicationNo;
+    }
+
+    public void setIntApplicationNo(int intApplicationNo) {
+        this.intApplicationNo = intApplicationNo;
     }
 
 }

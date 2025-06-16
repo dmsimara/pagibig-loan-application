@@ -404,8 +404,76 @@ public class MemberStatus extends javax.swing.JFrame {
 
                 button.addActionListener(new ActionListener() {
                     public void actionPerformed(ActionEvent e) {
-                        System.out.println("View Record button clicked!");
                         fireEditingStopped();
+                        int selectedRow = table.getSelectedRow();
+                        if (selectedRow >= 0) {
+                            int modelRow = table.convertRowIndexToModel(selectedRow);
+                            int applicationNo = Integer.parseInt(model.getValueAt(modelRow, 0).toString());
+                            String pagibigMid = (String) model.getValueAt(modelRow, 3);
+                            try {
+                                com.mycompany.pagibigapplication.dao.MemberDao memberDao = new com.mycompany.pagibigapplication.dao.impl.MemberDaoImpl();
+                                com.mycompany.pagibigapplication.models.Member member = memberDao.getMemberByPagibigMid(pagibigMid);
+
+                                com.mycompany.pagibigapplication.dao.LoanApplicationDao loanApplicationDao = new com.mycompany.pagibigapplication.dao.impl.LoanApplicationDaoImpl();
+                                java.util.List<com.mycompany.pagibigapplication.models.LoanApplication> loanApplications = loanApplicationDao.getLoanApplicationsByApplicationNo(applicationNo);
+
+                                com.mycompany.pagibigapplication.dao.CollateralDao collateralDao = new com.mycompany.pagibigapplication.dao.impl.CollateralDaoImpl();
+                                com.mycompany.pagibigapplication.models.Collateral collateral = collateralDao.getCollateralByApplicationNo(applicationNo);
+
+                                com.mycompany.pagibigapplication.dao.SpouseDao spouseDao = new com.mycompany.pagibigapplication.dao.impl.SpouseDaoImpl();
+                                com.mycompany.pagibigapplication.models.Spouse spouse = spouseDao.getSpouseByPagibigMid(pagibigMid);
+
+                                com.mycompany.pagibigapplication.dao.BankDao bankDao = new com.mycompany.pagibigapplication.dao.impl.BankDaoImpl();
+                                java.util.List<com.mycompany.pagibigapplication.models.Bank> banks = bankDao.getBanksByApplicationNo(applicationNo);
+
+                                com.mycompany.pagibigapplication.dao.RealEstateDao realEstateDao = new com.mycompany.pagibigapplication.dao.impl.RealEstateDaoImpl();
+                                java.util.List<com.mycompany.pagibigapplication.models.RealEstate> realEstates = realEstateDao.getRealEstatesByApplicationNo(applicationNo);
+
+                                com.mycompany.pagibigapplication.dao.OutstandingCreditsDao outstandingCreditsDao = new com.mycompany.pagibigapplication.dao.impl.OutstandingCreditsDaoImpl();
+                                java.util.List<com.mycompany.pagibigapplication.models.OutstandingCredits> credits = outstandingCreditsDao.getOutstandingCreditsByApplicationNo(applicationNo);
+
+                                com.mycompany.pagibigapplication.dao.EmployerDao employerDao = new com.mycompany.pagibigapplication.dao.impl.EmployerDaoImpl();
+                                com.mycompany.pagibigapplication.models.Employer employer = null;
+                                if (member != null) {
+                                    employer = employerDao.getEmployerByEmployerId(String.valueOf(member.getEmployerId()));
+                                }
+
+                                com.mycompany.pagibigapplication.models.Application application = new com.mycompany.pagibigapplication.models.Application();
+                                application.setApplicationNo(applicationNo);
+                                application.setPagibigMid(pagibigMid);
+
+                                Object dateSubmittedObj = model.getValueAt(modelRow, 2);
+                                if (dateSubmittedObj != null) {
+                                    try {
+                                        application.setDateSubmitted(java.time.LocalDate.parse(dateSubmittedObj.toString()));
+                                    } catch (java.time.format.DateTimeParseException ex) {
+                                        application.setDateSubmitted(null);
+                                    }
+                                } else {
+                                    application.setDateSubmitted(null);
+                                }
+
+                                Object statusObj = model.getValueAt(modelRow, 5);
+                                if (statusObj != null) {
+                                    try {
+                                        application.setStatus(com.mycompany.pagibigapplication.models.Application.Status.valueOf(statusObj.toString()));
+                                        if(application.getStatus() == null) {
+                                            application.setStatus(com.mycompany.pagibigapplication.models.Application.Status.Pending);
+                                        }
+                                    } catch (IllegalArgumentException ex) {
+                                        application.setStatus(com.mycompany.pagibigapplication.models.Application.Status.Pending);
+                                    }
+                                } else {
+                                    application.setStatus(com.mycompany.pagibigapplication.models.Application.Status.Pending);
+                                }
+
+                                MemberRecordDialog dialog = new MemberRecordDialog(MemberStatus.this, application, loanApplications, collateral, spouse, banks, realEstates, credits, employer, pagibigMid);
+                                dialog.setVisible(true);
+                            } catch (Exception ex) {
+                                ex.printStackTrace();
+                                JOptionPane.showMessageDialog(MemberStatus.this, "Failed to load record details.", "Error", JOptionPane.ERROR_MESSAGE);
+                            }
+                        }
                     }
                 });
             }
@@ -455,8 +523,8 @@ public class MemberStatus extends javax.swing.JFrame {
                     app.getMemberName(),
                     app.getDateSubmitted(),
                     app.getPagibigMid(),
-                    "", 
-                    app.getStatus()
+                    "View Record", 
+                    app.getStatus() != null ? app.getStatus().name() : "Pending"
                 });
             }
         } catch (SQLException e) {
@@ -483,6 +551,7 @@ public class MemberStatus extends javax.swing.JFrame {
         this.getContentPane().repaint();
         this.getContentPane().revalidate();
     }
+
 
     private JButton createSidebarButton(String text, String iconPath, int yPosition) {
         ImageIcon icon = new ImageIcon(iconPath);
@@ -529,11 +598,6 @@ public class MemberStatus extends javax.swing.JFrame {
     }
 
     public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
         try {
             for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
                 if ("Nimbus".equals(info.getName())) {

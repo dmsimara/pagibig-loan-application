@@ -23,13 +23,14 @@ public class Spouse {
     private int intSpouseYearsEmployment; 
     private String strPagibigMid;
     private String memberName;
+    private int intApplicationNo;
 
     public Spouse() {
     }
 
     public Spouse(String strSpousePagibigMid, String strSpouseName, Citizenship enumSpouseCitizenship, LocalDate dtSpouseDOB,
                   String strSpouseTin, String strSpouseOccupation, String strSpouseBusinessPhone, int intEmployerId,
-                  String strSpousePosition, int intSpouseYearsEmployment, String strPagibigMid, String memberName) {
+                  String strSpousePosition, int intSpouseYearsEmployment, String strPagibigMid, String memberName,int intApplicationNo) {
         this.strSpousePagibigMid = strSpousePagibigMid;
         this.strSpouseName = strSpouseName;
         this.enumSpouseCitizenship = enumSpouseCitizenship;
@@ -42,6 +43,7 @@ public class Spouse {
         this.intSpouseYearsEmployment = intSpouseYearsEmployment;
         this.strPagibigMid = strPagibigMid;
         this.memberName = memberName;
+        this.intApplicationNo = intApplicationNo;
     }
 
     public String getStrSpousePagibigMid() {
@@ -146,5 +148,13 @@ public class Spouse {
 
     public void setMemberName(String memberName) {
         this.memberName = memberName;
+    }
+    
+    public int getIntApplicationNo() {
+        return intApplicationNo;
+    }
+
+    public void setIntApplicationNo(int intApplicationNo) {
+        this.intApplicationNo = intApplicationNo;
     }
 }

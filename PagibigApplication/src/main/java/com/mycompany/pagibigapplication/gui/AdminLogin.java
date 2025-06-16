@@ -28,7 +28,7 @@ public class AdminLogin extends javax.swing.JFrame {
         this.authService = authService;
         
         setTitle("PagIBIG Housing Loan Application");
-        ImageIcon icon = new ImageIcon("src/main/java/com/mycompany/pagibigapplication/resources/logoIcon.png");
+        ImageIcon icon = new ImageIcon(getClass().getResource("/images/logoIcon.png"));
         setIconImage(icon.getImage());
         
         initComponents();
@@ -48,7 +48,7 @@ public class AdminLogin extends javax.swing.JFrame {
         rightPanel.setLayout(null);
         
         // logo
-        ImageIcon loginIcon = new ImageIcon("src/main/java/com/mycompany/pagibigapplication/resources/loginLogo.png");
+        ImageIcon loginIcon = new ImageIcon(getClass().getResource("/images/loginLogo.png"));
         Image scaledImg = loginIcon.getImage().getScaledInstance(200, 200, Image.SCALE_SMOOTH);
         ImageIcon scaledIcon = new ImageIcon(scaledImg);
         JLabel loginIconLabel = new JLabel(scaledIcon);

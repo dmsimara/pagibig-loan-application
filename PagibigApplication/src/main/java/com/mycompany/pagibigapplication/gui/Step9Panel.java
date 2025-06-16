@@ -2,7 +2,6 @@ package com.mycompany.pagibigapplication.gui;
 
 import com.mycompany.pagibigapplication.dao.*;
 import com.mycompany.pagibigapplication.dao.impl.*;
-import com.mycompany.pagibigapplication.models.*;
 import com.mycompany.pagibigapplication.services.ApplicationData;
 import com.mycompany.pagibigapplication.services.AuthService;
 
@@ -18,7 +17,6 @@ public class Step9Panel extends javax.swing.JPanel {
     private JButton btnSubmit;
     private JButton btnBack;
 
-    // DAO instances
     private final LoanApplicationDao loanApplicationDao;
     private final MemberDao memberDao;
     private final CollateralDao collateralDao;
@@ -32,7 +30,6 @@ public class Step9Panel extends javax.swing.JPanel {
         this.parent = parent;
         this.appData = appData;
 
-        // Initialize DAO implementations
         this.loanApplicationDao = new LoanApplicationDaoImpl();
         this.memberDao = new MemberDaoImpl();
         this.collateralDao = new CollateralDaoImpl();
@@ -47,7 +44,6 @@ public class Step9Panel extends javax.swing.JPanel {
     }
 
     void setupForm() {
-        // Clear existing components
         this.removeAll();
         this.revalidate();
         this.repaint();
@@ -88,7 +84,7 @@ public class Step9Panel extends javax.swing.JPanel {
         gbc.anchor = GridBagConstraints.CENTER;
 
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 0));
-        buttonPanel.setOpaque(false); // Make background transparent
+        buttonPanel.setOpaque(false); 
         btnBack = new JButton("Back");
         btnBack.setFont(new Font("SansSerif", Font.PLAIN, 14));
         btnSubmit = new JButton("Submit");
@@ -106,14 +102,12 @@ public class Step9Panel extends javax.swing.JPanel {
         gbcMain.gridy = 0;
         this.add(rectanglePanel, gbcMain);
 
-        btnSubmit.addActionListener(e -> {
+        btnSubmit.addActionListener(event -> {
             try {
-                // Validate dateOfBirth before saving
                 if (appData.getMember() != null) {
                     try {
                         if (appData.getMember().getDateOfBirth() == null) {
-                            // Optionally, you can set a default date or show error
-                            // For now, just allow null
+                            
                         }
                     } catch (Exception ex) {
                         JOptionPane.showMessageDialog(this, "Invalid date of birth. Please enter a valid date.", "Validation Error", JOptionPane.ERROR_MESSAGE);
@@ -121,35 +115,67 @@ public class Step9Panel extends javax.swing.JPanel {
                     }
                 }
 
-                // Save data to respective DAOs
-                loanApplicationDao.saveLoanApplication(java.util.Collections.singletonList(appData.getLoan()));
                 memberDao.saveMember(appData.getMember());
-                collateralDao.saveCollateral(appData.getCollateral());
-                spouseDao.saveSpouse(appData.getSpouse(), appData.getMember().getPagibigMid());
-                bankDao.saveBanks(appData.getBankList());
-                realEstateDao.saveRealEstates(appData.getRealEstateList());
-                outstandingCreditsDao.saveOutstandingCredits(appData.getCreditsList());
-                employerDao.saveEmployer(appData.getEmployer());
-                
-                // Save application tracker record
+
                 com.mycompany.pagibigapplication.dao.ApplicationDao applicationDao = new com.mycompany.pagibigapplication.dao.impl.ApplicationDaoImpl();
                 com.mycompany.pagibigapplication.models.Application application = new com.mycompany.pagibigapplication.models.Application();
                 application.setPagibigMid(appData.getMember().getPagibigMid());
                 application.setDateSubmitted(java.time.LocalDate.now());
                 application.setStatus(com.mycompany.pagibigapplication.models.Application.Status.Pending);
-                applicationDao.saveApplication(application);
+
+                try (java.sql.Connection conn = com.mycompany.pagibigapplication.db.DBConnection.getConnection()) {
+                    conn.setAutoCommit(false);
+                    try {
+                        int applicationNo = ((com.mycompany.pagibigapplication.dao.impl.ApplicationDaoImpl) applicationDao).saveApplication(conn, application);
+
+                        appData.getLoan().setIntApplicationNo(applicationNo);
+                        appData.getCollateral().setIntApplicationNo(applicationNo);
+                        appData.getSpouse().setIntApplicationNo(applicationNo);
+                        for (var realEstate : appData.getRealEstateList()) {
+                            realEstate.setIntApplicationNo(applicationNo);
+                        }
+                        for (var credit : appData.getCreditsList()) {
+                            credit.setIntApplicationNo(applicationNo);
+                        }
+                        
+                        for (var bank : appData.getBankList()) {
+                            bank.setIntApplicationNo(applicationNo);
+                        }
+
+                        ((com.mycompany.pagibigapplication.dao.impl.LoanApplicationDaoImpl) loanApplicationDao).saveLoanApplication(conn, appData.getLoan());
+                        ((com.mycompany.pagibigapplication.dao.impl.CollateralDaoImpl) collateralDao).saveCollateral(conn, appData.getCollateral());
+                        ((com.mycompany.pagibigapplication.dao.impl.SpouseDaoImpl) spouseDao).saveSpouse(conn, appData.getSpouse(), appData.getMember().getPagibigMid());
+                        ((com.mycompany.pagibigapplication.dao.impl.BankDaoImpl) bankDao).saveBanks(conn, appData.getBankList());
+                        ((com.mycompany.pagibigapplication.dao.impl.RealEstateDaoImpl) realEstateDao).saveRealEstates(conn, appData.getRealEstateList());
+                        ((com.mycompany.pagibigapplication.dao.impl.OutstandingCreditsDaoImpl) outstandingCreditsDao).saveOutstandingCredits(conn, appData.getCreditsList());
+                        ((com.mycompany.pagibigapplication.dao.impl.EmployerDaoImpl) employerDao).saveEmployer(conn, appData.getEmployer());
+
+                        conn.commit();
+                    } catch (Exception e) {
+                        conn.rollback();
+                        throw e;
+                    } finally {
+                        conn.setAutoCommit(true);
+                    }
+                }
 
                 JOptionPane.showMessageDialog(this, "Application submitted successfully!", "Submission", JOptionPane.INFORMATION_MESSAGE);
-                JFrame topFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
-                topFrame.dispose();
-                
-                new MemberDashboard(authService).setVisible(true);
+                java.awt.EventQueue.invokeLater(() -> {
+                    JFrame topFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
+                    topFrame.dispose();
+                    try {
+                        JFrame dashboard = new com.mycompany.pagibigapplication.gui.MemberDashboard(authService);
+                        dashboard.setVisible(true);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        JOptionPane.showMessageDialog(null, "Failed to open Member Dashboard: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                    }
+                });
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(this, "Error submitting application: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
                 ex.printStackTrace();
             }
         });
-
 
         btnBack.addActionListener(e -> parent.previousStep());
     }

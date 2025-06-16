@@ -45,7 +45,7 @@ public class BankPage extends javax.swing.JFrame {
         this.authService = authService;
         
         setTitle("PagIBIG Housing Loan Application");
-        ImageIcon icon = new ImageIcon("src/main/java/com/mycompany/pagibigapplication/resources/logoIcon.png");
+        ImageIcon icon = new ImageIcon(getClass().getResource("/images/logoIcon.png"));
         setIconImage(icon.getImage());
         
         initComponents();
@@ -85,7 +85,7 @@ public class BankPage extends javax.swing.JFrame {
         this.getContentPane().add(topBar);
         
         // icon header
-        ImageIcon header = new ImageIcon("src/main/java/com/mycompany/pagibigapplication/resources/header.png");
+        ImageIcon header = new ImageIcon(getClass().getResource("/images/header.png"));
         int intWidth = header.getIconWidth();
         int intHeight = header.getIconHeight();
         int intTargetH = 40;

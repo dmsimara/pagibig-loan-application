@@ -14,8 +14,8 @@ import java.util.List;
 
 public class OutstandingCreditsDaoImpl implements OutstandingCreditsDao {
 
-    private static final String INSERT_SQL = "INSERT INTO outstanding_credits (creditorId, creditorName, creditorAddress, housingAccountNo, creditSecurity, creditType, maturityDate, outstandingBalance, monthlyAmortization) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-    private static final String UPDATE_SQL = "UPDATE outstanding_credits SET creditorName = ?, creditorAddress = ?, housingAccountNo = ?, creditSecurity = ?, creditType = ?, maturityDate = ?, outstandingBalance = ?, monthlyAmortization = ? WHERE creditorId = ?";
+    private static final String INSERT_SQL = "INSERT INTO outstanding_credits (creditorId, creditorName, creditorAddress, housingAccountNo, creditSecurity, creditType, maturityDate, outstandingBalance, monthlyAmortization, applicationNo) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    private static final String UPDATE_SQL = "UPDATE outstanding_credits SET creditorName = ?, creditorAddress = ?, housingAccountNo = ?, creditSecurity = ?, creditType = ?, maturityDate = ?, outstandingBalance = ?, monthlyAmortization = ?, applicationNo = ? WHERE creditorId = ?";
     private static final String SELECT_BY_HOUSING_ACCOUNT_NO_SQL = "SELECT creditorId, creditorName, creditorAddress, housingAccountNo, creditSecurity, creditType, maturityDate, outstandingBalance, monthlyAmortization FROM outstanding_credits WHERE housingAccountNo = ?";
     private static final String SELECT_MAX_CREDITOR_ID_SQL = "SELECT creditorId FROM outstanding_credits ORDER BY creditorId DESC LIMIT 1";
     private static final String SELECT_BY_CREDITOR_ID_SQL = "SELECT creditorId FROM outstanding_credits WHERE creditorId = ?";
@@ -49,12 +49,31 @@ public class OutstandingCreditsDaoImpl implements OutstandingCreditsDao {
         }
     }
 
+    public void saveOutstandingCredits(Connection conn, List<OutstandingCredits> credits) throws Exception {
+        try {
+            for (OutstandingCredits credit : credits) {
+                if (credit.getStrCreditorId() == null || credit.getStrCreditorId().isEmpty()) {
+                    String nextCreditorId = getNextCreditorId(conn);
+                    credit.setStrCreditorId(nextCreditorId);
+                }
+                if (existsByCreditorId(conn, credit.getStrCreditorId())) {
+                    updateOutstandingCredit(conn, credit);
+                } else {
+                    insertOutstandingCredit(conn, credit);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new Exception("Error saving OutstandingCredits records: " + e.getMessage(), e);
+        }
+    }
+
     @Override
-    public List<OutstandingCredits> getOutstandingCreditsByCreditorId(String housingAccountNo) throws Exception {
+    public List<OutstandingCredits> getOutstandingCreditsByCreditorId(String creditorId) throws Exception {
         List<OutstandingCredits> credits = new ArrayList<>();
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(SELECT_BY_HOUSING_ACCOUNT_NO_SQL)) {
-            stmt.setString(1, housingAccountNo);
+             PreparedStatement stmt = conn.prepareStatement(SELECT_BY_CREDITOR_ID_SQL)) {
+            stmt.setString(1, creditorId);
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
                     OutstandingCredits credit = mapResultSetToOutstandingCredit(rs);
@@ -63,7 +82,27 @@ public class OutstandingCreditsDaoImpl implements OutstandingCreditsDao {
             }
         } catch (SQLException e) {
             e.printStackTrace();
-            throw new Exception("Error retrieving OutstandingCredits by housingAccountNo: " + e.getMessage(), e);
+            throw new Exception("Error retrieving OutstandingCredits by creditorId: " + e.getMessage(), e);
+        }
+        return credits;
+    }
+
+    @Override
+    public List<OutstandingCredits> getOutstandingCreditsByApplicationNo(int applicationNo) throws Exception {
+        List<OutstandingCredits> credits = new ArrayList<>();
+        String sql = "SELECT creditorId, creditorName, creditorAddress, housingAccountNo, creditSecurity, creditType, maturityDate, outstandingBalance, monthlyAmortization FROM outstanding_credits WHERE applicationNo = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, applicationNo);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    OutstandingCredits credit = mapResultSetToOutstandingCredit(rs);
+                    credits.add(credit);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new Exception("Error retrieving OutstandingCredits by applicationNo: " + e.getMessage(), e);
         }
         return credits;
     }
@@ -102,6 +141,7 @@ public class OutstandingCreditsDaoImpl implements OutstandingCreditsDao {
             stmt.setDate(7, credit.getDtMaturityDate() != null ? Date.valueOf(credit.getDtMaturityDate()) : null);
             stmt.setBigDecimal(8, credit.getBdOutstandingBalance());
             stmt.setBigDecimal(9, credit.getBdMonthlyAmortization());
+            stmt.setInt(10, credit.getIntApplicationNo());
             stmt.executeUpdate();
         }
     }
@@ -116,7 +156,8 @@ public class OutstandingCreditsDaoImpl implements OutstandingCreditsDao {
             stmt.setDate(6, credit.getDtMaturityDate() != null ? Date.valueOf(credit.getDtMaturityDate()) : null);
             stmt.setBigDecimal(7, credit.getBdOutstandingBalance());
             stmt.setBigDecimal(8, credit.getBdMonthlyAmortization());
-            stmt.setString(9, credit.getStrCreditorId());
+            stmt.setInt(9, credit.getIntApplicationNo());
+            stmt.setString(10, credit.getStrCreditorId());
             stmt.executeUpdate();
         }
     }

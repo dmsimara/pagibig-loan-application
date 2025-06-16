@@ -39,6 +39,7 @@ public class Collateral {
     private boolean bIsOffsiteCollateral;        
     private String strOffsiteCollateralReason;   
     private String strHousingAccountNo;
+    private int intApplicationNo;
 
     public Collateral() {
     }
@@ -48,7 +49,7 @@ public class Collateral {
                       String strTaxDeclarationNo, String strLotUnitNo, String strBlockBuildingNo, int intNumberOfStoreys,
                       boolean bIsPropertyMortgaged, BigDecimal bdLandAreaSqm, BigDecimal bdFloorAreaSqm,
                       int intAgeOfHouse, BigDecimal bdTotalFloorAreaSqm, boolean bIsOffsiteCollateral,
-                      String strOffsiteCollateralReason, String strHousingAccountNo) {
+                      String strOffsiteCollateralReason, String strHousingAccountNo, int intApplicationNo) {
         this.strTctOctCctNo = strTctOctCctNo;
         this.strPrimaryPropertyLocation = strPrimaryPropertyLocation;
         this.enumPropertyType = enumPropertyType;
@@ -66,6 +67,7 @@ public class Collateral {
         this.bIsOffsiteCollateral = bIsOffsiteCollateral;
         this.strOffsiteCollateralReason = strOffsiteCollateralReason;
         this.strHousingAccountNo = strHousingAccountNo;
+        this.intApplicationNo = intApplicationNo;
     }
 
 
@@ -203,5 +205,13 @@ public class Collateral {
     
     public void setStrHousingAccountNo(String strHousingAccountNo) {
         this.strHousingAccountNo = strHousingAccountNo;
+    }
+    
+    public int getIntApplicationNo() {
+        return intApplicationNo;
+    }
+
+    public void setIntApplicationNo(int intApplicationNo) {
+        this.intApplicationNo = intApplicationNo;
     }
 }

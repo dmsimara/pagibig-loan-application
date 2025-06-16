@@ -11,8 +11,8 @@ import java.util.List;
 
 public class RealEstateDaoImpl implements RealEstateDao {
 
-    private static final String INSERT_SQL = "INSERT INTO real_estate (realEstateId, realEstateLocation, realEstateType, housingAccountNo, acquisitionCost, marketValue, mortgageBalance, rentalIncome) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-    private static final String UPDATE_SQL = "UPDATE real_estate SET realEstateLocation = ?, realEstateType = ?, housingAccountNo = ?, acquisitionCost = ?, marketValue = ?, mortgageBalance = ?, rentalIncome = ? WHERE realEstateId = ?";
+    private static final String INSERT_SQL = "INSERT INTO real_estate (realEstateId, realEstateLocation, realEstateType, housingAccountNo, acquisitionCost, marketValue, mortgageBalance, rentalIncome, applicationNo) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    private static final String UPDATE_SQL = "UPDATE real_estate SET realEstateLocation = ?, realEstateType = ?, housingAccountNo = ?, acquisitionCost = ?, marketValue = ?, mortgageBalance = ?, rentalIncome = ?, applicationNo = ? WHERE realEstateId = ?";
     private static final String SELECT_BY_HOUSING_ACCOUNT_NO_SQL = "SELECT realEstateId, realEstateLocation, realEstateType, housingAccountNo, acquisitionCost, marketValue, mortgageBalance, rentalIncome FROM real_estate WHERE housingAccountNo = ?";
     private static final String SELECT_MAX_REAL_ESTATE_ID_SQL = "SELECT realEstateId FROM real_estate ORDER BY realEstateId DESC LIMIT 1";
     private static final String SELECT_BY_REAL_ESTATE_ID_SQL = "SELECT realEstateId FROM real_estate WHERE realEstateId = ?";
@@ -46,6 +46,25 @@ public class RealEstateDaoImpl implements RealEstateDao {
         }
     }
 
+    public void saveRealEstates(Connection conn, List<RealEstate> realEstates) throws Exception {
+        try {
+            for (RealEstate realEstate : realEstates) {
+                if (realEstate.getStrRealEstateId() == null || realEstate.getStrRealEstateId().isEmpty()) {
+                    String nextRealEstateId = getNextRealEstateId(conn);
+                    realEstate.setStrRealEstateId(nextRealEstateId);
+                }
+                if (existsByRealEstateId(conn, realEstate.getStrRealEstateId())) {
+                    updateRealEstate(conn, realEstate);
+                } else {
+                    insertRealEstate(conn, realEstate);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new Exception("Error saving RealEstate records: " + e.getMessage(), e);
+        }
+    }
+
     @Override
     public List<RealEstate> getRealEstatesByRealEstateId(String housingAccountNo) throws Exception {
         List<RealEstate> realEstates = new ArrayList<>();
@@ -61,6 +80,26 @@ public class RealEstateDaoImpl implements RealEstateDao {
         } catch (SQLException e) {
             e.printStackTrace();
             throw new Exception("Error retrieving RealEstates by housingAccountNo: " + e.getMessage(), e);
+        }
+        return realEstates;
+    }
+
+    @Override
+    public List<RealEstate> getRealEstatesByApplicationNo(int applicationNo) throws Exception {
+        List<RealEstate> realEstates = new ArrayList<>();
+        String sql = "SELECT realEstateId, realEstateLocation, realEstateType, housingAccountNo, acquisitionCost, marketValue, mortgageBalance, rentalIncome FROM real_estate WHERE applicationNo = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, applicationNo);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    RealEstate realEstate = mapResultSetToRealEstate(rs);
+                    realEstates.add(realEstate);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new Exception("Error retrieving RealEstates by applicationNo: " + e.getMessage(), e);
         }
         return realEstates;
     }
@@ -98,6 +137,7 @@ public class RealEstateDaoImpl implements RealEstateDao {
             stmt.setBigDecimal(6, realEstate.getBdMarketValue());
             stmt.setBigDecimal(7, realEstate.getBdMortgageBalance());
             stmt.setBigDecimal(8, realEstate.getBdRentalIncome());
+            stmt.setInt(9, realEstate.getIntApplicationNo());
             stmt.executeUpdate();
         }
     }
@@ -111,7 +151,8 @@ public class RealEstateDaoImpl implements RealEstateDao {
             stmt.setBigDecimal(5, realEstate.getBdMarketValue());
             stmt.setBigDecimal(6, realEstate.getBdMortgageBalance());
             stmt.setBigDecimal(7, realEstate.getBdRentalIncome());
-            stmt.setString(8, realEstate.getStrRealEstateId());
+            stmt.setInt(8, realEstate.getIntApplicationNo());
+            stmt.setString(9, realEstate.getStrRealEstateId());
             stmt.executeUpdate();
         }
     }

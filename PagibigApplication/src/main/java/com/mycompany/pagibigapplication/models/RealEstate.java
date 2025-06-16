@@ -28,12 +28,13 @@ public class RealEstate {
     private BigDecimal bdMarketValue;        
     private BigDecimal bdMortgageBalance;   
     private BigDecimal bdRentalIncome;      
+    private int intApplicationNo;
 
     public RealEstate() {
     }
 
     public RealEstate(String strRealEstateId, String strRealEstateLocation, RealEstateType enumRealEstateType, String strHousingAccountNo,
-                      BigDecimal bdAcquisitionCost, BigDecimal bdMarketValue, BigDecimal bdMortgageBalance, BigDecimal bdRentalIncome) {
+                      BigDecimal bdAcquisitionCost, BigDecimal bdMarketValue, BigDecimal bdMortgageBalance, BigDecimal bdRentalIncome, int intApplicationNo) {
         this.strRealEstateId = strRealEstateId;
         this.strRealEstateLocation = strRealEstateLocation;
         this.enumRealEstateType = enumRealEstateType;
@@ -42,6 +43,7 @@ public class RealEstate {
         this.bdMarketValue = bdMarketValue;
         this.bdMortgageBalance = bdMortgageBalance;
         this.bdRentalIncome = bdRentalIncome;
+        this.intApplicationNo = intApplicationNo;
     }
 
 
@@ -107,5 +109,13 @@ public class RealEstate {
 
     public void setBdRentalIncome(BigDecimal bdRentalIncome) {
         this.bdRentalIncome = bdRentalIncome;
+    }
+    
+    public int getIntApplicationNo() {
+        return intApplicationNo;
+    }
+
+    public void setIntApplicationNo(int intApplicationNo) {
+        this.intApplicationNo = intApplicationNo;
     }
 }

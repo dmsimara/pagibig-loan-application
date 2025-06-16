@@ -38,6 +38,21 @@ public class EmployerDaoImpl implements EmployerDao {
         }
     }
 
+    public void saveEmployer(Connection conn, Employer employer) throws Exception {
+        try {
+            Integer existingEmployerId = findEmployerIdByName(conn, employer.getEmployerName());
+            if (existingEmployerId != null) {
+                employer.setEmployerId(existingEmployerId);
+                updateEmployer(conn, employer);
+            } else {
+                insertEmployer(conn, employer);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new Exception("Error saving Employer record: " + e.getMessage(), e);
+        }
+    }
+
     @Override
     public Employer getEmployerByEmployerId(String employerIdStr) throws Exception {
         Employer employer = null;

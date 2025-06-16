@@ -12,9 +12,9 @@ import java.util.List;
 
 public class BankDaoImpl implements BankDao {
 
-    private static final String INSERT_SQL = "INSERT INTO bank (bankId, bankName, accountNumber, housingAccountNo, bankBranch, accountType, dateOpened, averageBalance) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-    private static final String UPDATE_SQL = "UPDATE bank SET bankName = ?, accountNumber = ?, housingAccountNo = ?, bankBranch = ?, accountType = ?, dateOpened = ?, averageBalance = ? WHERE bankId = ?";
-    private static final String SELECT_BY_HOUSING_ACCOUNT_NO_SQL = "SELECT bankId, bankName, accountNumber, housingAccountNo, bankBranch, accountType, dateOpened, averageBalance FROM bank WHERE housingAccountNo = ?";
+    private static final String INSERT_SQL = "INSERT INTO bank (bankId, bankName, accountNumber, housingAccountNo, bankBranch, accountType, dateOpened, averageBalance, applicationNo) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    private static final String UPDATE_SQL = "UPDATE bank SET bankName = ?, accountNumber = ?, housingAccountNo = ?, bankBranch = ?, accountType = ?, dateOpened = ?, averageBalance = ?, applicationNo = ? WHERE bankId = ?";
+    private static final String SELECT_BY_HOUSING_ACCOUNT_NO_SQL = "SELECT bankId, bankName, accountNumber, housingAccountNo, bankBranch, accountType, dateOpened, averageBalance, applicationNo FROM bank WHERE housingAccountNo = ?";
     private static final String SELECT_MAX_BANK_ID_SQL = "SELECT bankId FROM bank ORDER BY bankId DESC LIMIT 1";
     private static final String SELECT_BY_BANK_ID_SQL = "SELECT bankId FROM bank WHERE bankId = ?";
 
@@ -47,6 +47,25 @@ public class BankDaoImpl implements BankDao {
         }
     }
 
+    public void saveBanks(Connection conn, List<Bank> banks) throws Exception {
+        try {
+            for (Bank bank : banks) {
+                if (bank.getStrBankId() == null || bank.getStrBankId().isEmpty()) {
+                    String nextBankId = getNextBankId(conn);
+                    bank.setStrBankId(nextBankId);
+                }
+                if (existsByBankId(conn, bank.getStrBankId())) {
+                    updateBank(conn, bank);
+                } else {
+                    insertBank(conn, bank);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new Exception("Error saving Bank records: " + e.getMessage(), e);
+        }
+    }
+
     @Override
     public List<Bank> getBanksByBankId(String housingAccountNo) throws Exception {
         List<Bank> banks = new ArrayList<>();
@@ -62,6 +81,26 @@ public class BankDaoImpl implements BankDao {
         } catch (SQLException e) {
             e.printStackTrace();
             throw new Exception("Error retrieving Banks by housingAccountNo: " + e.getMessage(), e);
+        }
+        return banks;
+    }
+
+    @Override
+    public List<Bank> getBanksByApplicationNo(int applicationNo) throws Exception {
+        List<Bank> banks = new ArrayList<>();
+        String sql = "SELECT bankId, bankName, accountNumber, housingAccountNo, bankBranch, accountType, dateOpened, averageBalance, applicationNo FROM bank WHERE applicationNo = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, applicationNo);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Bank bank = mapResultSetToBank(rs);
+                    banks.add(bank);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new Exception("Error retrieving Banks by applicationNo: " + e.getMessage(), e);
         }
         return banks;
     }
@@ -107,6 +146,7 @@ public class BankDaoImpl implements BankDao {
             stmt.setString(6, bank.getEnumAccountType() != null ? bank.getEnumAccountType().name() : null);
             stmt.setDate(7, bank.getDtDateOpened() != null ? Date.valueOf(bank.getDtDateOpened()) : null);
             stmt.setBigDecimal(8, bank.getBdAverageBalance());
+            stmt.setInt(9, bank.getIntApplicationNo());
             stmt.executeUpdate();
         }
     }
@@ -128,7 +168,8 @@ public class BankDaoImpl implements BankDao {
             stmt.setString(5, bank.getEnumAccountType() != null ? bank.getEnumAccountType().name() : null);
             stmt.setDate(6, bank.getDtDateOpened() != null ? Date.valueOf(bank.getDtDateOpened()) : null);
             stmt.setBigDecimal(7, bank.getBdAverageBalance());
-            stmt.setString(8, bank.getStrBankId());
+            stmt.setInt(8, bank.getIntApplicationNo());
+            stmt.setString(9, bank.getStrBankId());
             stmt.executeUpdate();
         }
     }
@@ -159,6 +200,7 @@ public class BankDaoImpl implements BankDao {
             bank.setDtDateOpened(null);
         }
         bank.setBdAverageBalance(rs.getBigDecimal("averageBalance"));
+        bank.setIntApplicationNo(rs.getInt("applicationNo"));
         return bank;
     }
 }

@@ -17,6 +17,7 @@ import javax.swing.JSeparator;
 
 import com.mycompany.pagibigapplication.services.AuthService;
 import java.awt.Image;
+import java.net.URL;
 
 public class AdminDashboard extends javax.swing.JFrame {
 
@@ -34,7 +35,7 @@ public class AdminDashboard extends javax.swing.JFrame {
         this.authService = authService;
         
         setTitle("PagIBIG Housing Loan Application");
-        ImageIcon icon = new ImageIcon("src/main/java/com/mycompany/pagibigapplication/resources/logoIcon.png");
+        ImageIcon icon = new ImageIcon(getClass().getResource("/images/logoIcon.png"));
         setIconImage(icon.getImage());
         
         initComponents();
@@ -75,7 +76,7 @@ public class AdminDashboard extends javax.swing.JFrame {
         this.getContentPane().add(topBar);
         
         // icon header
-        ImageIcon header = new ImageIcon("src/main/java/com/mycompany/pagibigapplication/resources/header.png");
+        ImageIcon header = new ImageIcon(getClass().getResource("/images/header.png"));
         int intWidth = header.getIconWidth();
         int intHeight = header.getIconHeight();
         int intTargetH = 40;
@@ -88,7 +89,7 @@ public class AdminDashboard extends javax.swing.JFrame {
         topBar.add(imageLabel);
         
         // profile
-        ImageIcon profileIcon = new ImageIcon("src/main/java/com/mycompany/pagibigapplication/resources/profile.png");
+        ImageIcon profileIcon = new ImageIcon(getClass().getResource("/images/profile.png"));
         int intProfileH = 30;
         int intProfileW = (profileIcon.getIconWidth() * intProfileH) / profileIcon.getIconHeight();
         Image profileImage = profileIcon.getImage().getScaledInstance(intProfileW, intProfileH, Image.SCALE_SMOOTH);
@@ -121,9 +122,9 @@ public class AdminDashboard extends javax.swing.JFrame {
         mainMenuLabel.setBounds(20, 15, 160, 30);  
         sideBar.add(mainMenuLabel);
         
-        JButton dashboardButton = createSidebarButton("Dashboard", "src/main/java/com/mycompany/pagibigapplication/resources/dashboardIcon.png", 50);
-        JButton loanQueueButton = createSidebarButton("Loan Queue", "src/main/java/com/mycompany/pagibigapplication/resources/loanQueueIcon.png", 100);
-        JButton applicantButton = createSidebarButton("Applicant Records ˅", "src/main/java/com/mycompany/pagibigapplication/resources/applicantIcon.png", 150);
+        JButton dashboardButton = createSidebarButton("Dashboard", "/images/dashboardIcon.png", 50);
+        JButton loanQueueButton = createSidebarButton("Loan Queue", "/images/loanQueueIcon.png", 100);
+        JButton applicantButton = createSidebarButton("Applicant Records ˅", "/images/applicantIcon.png", 150);
         
         sideBar.add(dashboardButton);
         sideBar.add(loanQueueButton);
@@ -206,7 +207,7 @@ public class AdminDashboard extends javax.swing.JFrame {
         helpLabel.setBounds(20, applicantSeparator.getY() + 10, 160, 30);
         sideBar.add(helpLabel);
         
-        JButton settingsButton = createSidebarButton("Settings", "src/main/java/com/mycompany/pagibigapplication/resources/settingsIcon.png", 250);
+        JButton settingsButton = createSidebarButton("Settings", "/images/settingsIcon.png", 250);
         sideBar.add(settingsButton);
         addHoverEffect(settingsButton);
         sidebarButtons.add(settingsButton);
@@ -218,7 +219,7 @@ public class AdminDashboard extends javax.swing.JFrame {
         sideBar.add(bottomSeparator);
         
         int logoutY = sideBar.getHeight() - 90; 
-        JButton logoutButton = createSidebarButton("Log out", "src/main/java/com/mycompany/pagibigapplication/resources/logoutIcon.png", logoutY);
+        JButton logoutButton = createSidebarButton("Log out", "/images/logoutIcon.png", logoutY);
         sideBar.add(logoutButton);
         addHoverEffect(logoutButton);
         sidebarButtons.add(logoutButton);
@@ -273,15 +274,177 @@ public class AdminDashboard extends javax.swing.JFrame {
         sidebarButtons.add(dashboardButton);
         sidebarButtons.add(loanQueueButton);
         
-
         setActiveButton(dashboardButton);
+        
+        JLabel dashboardLabel = new JLabel("DASHBOARD");
+        dashboardLabel.setForeground(Color.BLACK);
+        dashboardLabel.setFont(new Font("SansSerif", Font.BOLD, 24));
+        dashboardLabel.setBounds(240, 60, 200, 40);
+        this.getContentPane().add(dashboardLabel);
+        
+        RoundedPanel contentPanel = new RoundedPanel(40);
+        int contentX = 240;
+        int contentY = 110;
+        int contentWidth = getWidth() - contentX - 40;
+        int contentHeight = ((getHeight() - contentY - 50) / 3) + 30;
+        contentPanel.setBounds(contentX, contentY, contentWidth, contentHeight);
+        contentPanel.setBackground(Color.WHITE);
+        contentPanel.setLayout(null);
+        this.getContentPane().add(contentPanel);
+
+        JLabel overviewLabel = new JLabel("Overview Cards");
+        overviewLabel.setForeground(Color.BLACK);
+        overviewLabel.setFont(new Font("SansSerif", Font.BOLD, 18));
+        overviewLabel.setBounds(20, 20, 200, 30);
+        contentPanel.add(overviewLabel);
+
+        JLabel summaryLabel = new JLabel("This is the quick summary of Pag-IBIG Housing Loan Application");
+        summaryLabel.setForeground(Color.GRAY);
+        summaryLabel.setFont(new Font("SansSerif", Font.PLAIN, 14));
+        summaryLabel.setBounds(20, 50, 600, 20);
+        contentPanel.add(summaryLabel);
+        
+        java.net.URL imgURL = getClass().getResource("/images/memberCard.png");
+        ImageIcon memberCardIcon = new ImageIcon(imgURL);
+        int imgWidth = memberCardIcon.getIconWidth();
+        int imgHeight = memberCardIcon.getIconHeight();
+        int targetHeight = 40;
+        int targetWidth = (imgWidth * targetHeight) / imgHeight;
+        Image scaledMember = memberCardIcon.getImage().getScaledInstance(targetWidth, targetHeight, Image.SCALE_SMOOTH);
+        ImageIcon IconMember = new ImageIcon(scaledMember);
+        JLabel memberLabel = new JLabel(IconMember);
+        int imageX = contentPanel.getWidth() - targetWidth - 20;
+        int imageY = 20;
+        memberLabel.setBounds(imageX, imageY, targetWidth, targetHeight);
+        contentPanel.add(memberLabel);
+        
+        java.net.URL submittedImgURL = getClass().getResource("/images/submitted.png");
+        ImageIcon submittedIcon = new ImageIcon(submittedImgURL);
+        int submittedImgWidth = submittedIcon.getIconWidth();
+        int submittedImgHeight = submittedIcon.getIconHeight();
+        int submittedTargetHeight = submittedIcon.getIconHeight() - 10;
+        int submittedTargetWidth = (submittedIcon.getIconWidth() * submittedTargetHeight) / submittedIcon.getIconHeight();
+        Image submittedScaledImage = submittedIcon.getImage().getScaledInstance(submittedTargetWidth, submittedTargetHeight, Image.SCALE_SMOOTH);
+        ImageIcon submittedScaledIcon = new ImageIcon(submittedScaledImage);
+        JLabel submittedImageLabel = new JLabel(submittedScaledIcon);
+
+        String[] iconPaths = {"/images/approved.png", "/images/pending.png", "/images/rejected.png"};
+        java.util.List<ImageIcon> iconsList = new java.util.ArrayList<>();
+        int spacingIcons = 30; 
+        int totalWidth = submittedTargetWidth + (iconPaths.length * spacingIcons);
+        for (String iconPath : iconPaths) {
+            java.net.URL iconURL = getClass().getResource(iconPath);
+            if (iconURL != null) {
+                ImageIcon iconImg = new ImageIcon(iconURL);
+                int iconWidthImg = iconImg.getIconWidth();
+                int iconHeightImg = iconImg.getIconHeight();
+                int targetHeightImg = submittedTargetHeight;
+                int targetWidthImg = (iconWidthImg * targetHeightImg) / iconHeightImg;
+                Image scaledIconImg = iconImg.getImage().getScaledInstance(targetWidthImg, targetHeightImg, Image.SCALE_SMOOTH);
+                ImageIcon scaledIconIcon = new ImageIcon(scaledIconImg);
+                iconsList.add(scaledIconIcon);
+                totalWidth += targetWidthImg;
+            }
+        }
+
+        int startXIcons = (contentPanel.getWidth() - totalWidth) / 2;
+        int imageYIcons = 80;
+        int currentXIcons = startXIcons;
+
+        submittedImageLabel.setBounds(currentXIcons, imageYIcons, submittedTargetWidth, submittedTargetHeight);
+        contentPanel.add(submittedImageLabel);
+        currentXIcons += submittedTargetWidth + spacingIcons;
+
+        for (ImageIcon icon : iconsList) {
+            int iconWidthImg = icon.getIconWidth();
+            JLabel labelIcon = new JLabel(icon);
+            labelIcon.setBounds(currentXIcons, imageYIcons, iconWidthImg, submittedTargetHeight);
+            contentPanel.add(labelIcon);
+            currentXIcons += iconWidthImg + spacingIcons;
+        }
+        
+        java.net.URL applicationImgURL = getClass().getResource("/images/applications.png");
+        if (applicationImgURL != null) {
+            ImageIcon applicationIcon = new ImageIcon(applicationImgURL);
+            int originalWidth = applicationIcon.getIconWidth();
+            int originalHeight = applicationIcon.getIconHeight();
+            int appHeight = originalHeight - 20; 
+            int appWidth = (originalWidth * appHeight) / originalHeight;
+            Image scaledApplicationImage = applicationIcon.getImage().getScaledInstance(appWidth, appHeight, Image.SCALE_SMOOTH);
+            ImageIcon scaledApplicationIcon = new ImageIcon(scaledApplicationImage);
+            JLabel applicationLabel = new JLabel(scaledApplicationIcon);
+            int appImageX = 240; 
+            int appImageY = 110 + ((getHeight() - 110 - 50) / 3) + 40; 
+            applicationLabel.setBounds(appImageX, appImageY, appWidth, appHeight);
+            this.getContentPane().add(applicationLabel);
+
+            java.net.URL usersImgURL = getClass().getResource("/images/users.png");
+            if (usersImgURL != null) {
+                ImageIcon usersIcon = new ImageIcon(usersImgURL);
+                int usersOriginalWidth = usersIcon.getIconWidth();
+                int usersOriginalHeight = usersIcon.getIconHeight();
+
+                int usersTargetHeight = appHeight;
+                int usersTargetWidth = (usersOriginalWidth * usersTargetHeight) / usersOriginalHeight;
+                Image scaledUsersImage = usersIcon.getImage().getScaledInstance(usersTargetWidth, usersTargetHeight, Image.SCALE_SMOOTH);
+                ImageIcon scaledUsersIcon = new ImageIcon(scaledUsersImage);
+                JLabel usersLabel = new JLabel(scaledUsersIcon);
+                int usersImageX = 240 + appWidth + 20; 
+                int usersImageY = 110 + ((getHeight() - 110 - 50) / 3) + 40; 
+                usersLabel.setBounds(usersImageX, usersImageY, usersTargetWidth, usersTargetHeight);
+                this.getContentPane().add(usersLabel);
+            }
+            
+            int baseY = 110 + ((getHeight() - 110 - 50) / 3) + 40;
+            int spacingBelow = 5;
+            int intImageX = 240;
+            int gapBetweenImages = 0;
+
+            URL breakdownImgURL = getClass().getResource("/images/breakdown.png");
+            if (breakdownImgURL != null) {
+                ImageIcon breakdownIcon = new ImageIcon(breakdownImgURL);
+                int breakdownOriginalWidth = breakdownIcon.getIconWidth();
+                int breakdownOriginalHeight = breakdownIcon.getIconHeight();
+
+                int breakdownTargetHeight = appHeight; 
+                int breakdownTargetWidth = (breakdownOriginalWidth * breakdownTargetHeight) / breakdownOriginalHeight;
+
+                Image scaledBreakdownImage = breakdownIcon.getImage().getScaledInstance(breakdownTargetWidth, breakdownTargetHeight, Image.SCALE_SMOOTH);
+                ImageIcon scaledBreakdownIcon = new ImageIcon(scaledBreakdownImage);
+
+                JLabel breakdownLabel = new JLabel(scaledBreakdownIcon);
+                int breakdownImageY = baseY + appHeight + spacingBelow;
+                breakdownLabel.setBounds(intImageX, breakdownImageY, breakdownTargetWidth, breakdownTargetHeight);
+                this.getContentPane().add(breakdownLabel);
+
+                URL timeImgURL = getClass().getResource("/images/time.png");
+                if (timeImgURL != null) {
+                    ImageIcon timeIcon = new ImageIcon(timeImgURL);
+                    int timeOriginalWidth = timeIcon.getIconWidth();
+                    int timeOriginalHeight = timeIcon.getIconHeight();
+
+                    int timeTargetHeight = appHeight;
+                    int timeTargetWidth = (timeOriginalWidth * timeTargetHeight) / timeOriginalHeight + 25;
+
+
+                    Image scaledTimeImage = timeIcon.getImage().getScaledInstance(timeTargetWidth, timeTargetHeight, Image.SCALE_SMOOTH);
+                    ImageIcon scaledTimeIcon = new ImageIcon(scaledTimeImage);
+
+                    JLabel timeLabel = new JLabel(scaledTimeIcon);
+                    int timeImageX = intImageX + breakdownTargetWidth - 40;
+                    timeLabel.setBounds(timeImageX, breakdownImageY, timeTargetWidth, timeTargetHeight);
+                    this.getContentPane().add(timeLabel);
+                }
+            }
+
+        }
 
         this.getContentPane().repaint();
         this.getContentPane().revalidate();
     }
 
     private JButton createSidebarButton(String text, String iconPath, int yPosition) {
-        ImageIcon icon = new ImageIcon(iconPath);
+        ImageIcon icon = new ImageIcon(getClass().getResource(iconPath));
         JButton button = new JButton(text, icon);
         button.setBounds(10, yPosition, 220, 40);
         button.setFont(new Font("Poppins", Font.PLAIN, 14));

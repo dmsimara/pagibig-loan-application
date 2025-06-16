@@ -16,17 +16,13 @@ import javax.swing.ImageIcon;
 import java.awt.Cursor;
 import javax.swing.JOptionPane;
 import javax.swing.JSeparator;
-import javax.swing.border.LineBorder;
 import javax.swing.table.DefaultTableModel;
 import java.sql.Connection;
 
 import com.mycompany.pagibigapplication.services.AuthService;
-import com.mycompany.pagibigapplication.gui.RoundedPanel;
 import com.mycompany.pagibigapplication.db.DBConnection;
 import com.mycompany.pagibigapplication.models.Application;
-import com.mycompany.pagibigapplication.models.Member;
 import com.mycompany.pagibigapplication.services.MemberApplication;
-import com.mycompany.pagibigapplication.services.MemberService;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.SQLException;
@@ -86,14 +82,12 @@ public class LoanQueue extends javax.swing.JFrame {
 
     private void addCustomComponents() {
         
-        // for top bar
         topBar = new JPanel();
         topBar.setBackground(Color.WHITE);
         topBar.setBounds(0, 0, getWidth(), 45);  
         topBar.setLayout(null);  
         this.getContentPane().add(topBar);
         
-        // icon header
         ImageIcon header = new ImageIcon("src/main/java/com/mycompany/pagibigapplication/resources/header.png");
         int intWidth = header.getIconWidth();
         int intHeight = header.getIconHeight();
@@ -324,7 +318,7 @@ public class LoanQueue extends javax.swing.JFrame {
         
         // table for data
         String[] columns = {
-            "Application No.", "Member Name", "Date Submitted", "Pagibig MID", "Record", "Status"
+            "Application No.", "Member Name", "Date Submitted", "Pag-IBIG MID", "Record", "Status"
         };
         
         DefaultTableModel model = new DefaultTableModel(columns, 0) {
@@ -422,7 +416,7 @@ public class LoanQueue extends javax.swing.JFrame {
                 button.setFocusPainted(false);
                 button.setBorderPainted(false);
                 button.setFont(new Font("SansSerif", Font.PLAIN, 12));
-                button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+                button.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
                 button.addMouseListener(new MouseAdapter() {
                     @Override
@@ -438,8 +432,93 @@ public class LoanQueue extends javax.swing.JFrame {
 
                 button.addActionListener(new ActionListener() {
                     public void actionPerformed(ActionEvent e) {
-                        System.out.println("View Record button clicked!");
                         fireEditingStopped();
+                        int selectedRow = table.getSelectedRow();
+                        if (selectedRow >= 0) {
+                            int modelRow = table.convertRowIndexToModel(selectedRow);
+                            int applicationNoInt = Integer.parseInt(model.getValueAt(modelRow, 0).toString());
+                            String memberName = (String) model.getValueAt(modelRow, 1);
+                            String pagibigMid = (String) model.getValueAt(modelRow, 3); 
+
+                            try {
+                                com.mycompany.pagibigapplication.dao.MemberDao memberDao = new com.mycompany.pagibigapplication.dao.impl.MemberDaoImpl();
+                                com.mycompany.pagibigapplication.models.Member member = null;
+                                try {
+                                    member = memberDao.getMemberByPagibigMid(pagibigMid);
+                                } catch (Exception ex) {
+                                    ex.printStackTrace();
+                                }
+                                if (pagibigMid == null) {
+                                    throw new Exception("PagibigMid not found for member: " + memberName);
+                                }
+
+                                // Fetch loan applications by applicationNo
+                                com.mycompany.pagibigapplication.dao.LoanApplicationDao loanApplicationDao = new com.mycompany.pagibigapplication.dao.impl.LoanApplicationDaoImpl();
+                                java.util.List<com.mycompany.pagibigapplication.models.LoanApplication> loanApplications = loanApplicationDao.getLoanApplicationsByApplicationNo(applicationNoInt);
+
+                                // Fetch collateral by applicationNo
+                                com.mycompany.pagibigapplication.dao.CollateralDao collateralDao = new com.mycompany.pagibigapplication.dao.impl.CollateralDaoImpl();
+                                com.mycompany.pagibigapplication.models.Collateral collateral = collateralDao.getCollateralByApplicationNo(applicationNoInt);
+
+                                // Fetch spouse by pagibigMid
+                                com.mycompany.pagibigapplication.dao.SpouseDao spouseDao = new com.mycompany.pagibigapplication.dao.impl.SpouseDaoImpl();
+                                com.mycompany.pagibigapplication.models.Spouse spouse = spouseDao.getSpouseByPagibigMid(pagibigMid);
+
+                                // Fetch banks by applicationNo
+                                com.mycompany.pagibigapplication.dao.BankDao bankDao = new com.mycompany.pagibigapplication.dao.impl.BankDaoImpl();
+                                java.util.List<com.mycompany.pagibigapplication.models.Bank> banks = bankDao.getBanksByApplicationNo(applicationNoInt);
+
+                                // Fetch real estates by applicationNo
+                                com.mycompany.pagibigapplication.dao.RealEstateDao realEstateDao = new com.mycompany.pagibigapplication.dao.impl.RealEstateDaoImpl();
+                                java.util.List<com.mycompany.pagibigapplication.models.RealEstate> realEstates = realEstateDao.getRealEstatesByApplicationNo(applicationNoInt);
+
+                                // Fetch outstanding credits by applicationNo
+                                com.mycompany.pagibigapplication.dao.OutstandingCreditsDao outstandingCreditsDao = new com.mycompany.pagibigapplication.dao.impl.OutstandingCreditsDaoImpl();
+                                java.util.List<com.mycompany.pagibigapplication.models.OutstandingCredits> credits = outstandingCreditsDao.getOutstandingCreditsByApplicationNo(applicationNoInt);
+
+                                // Fetch employer by employerId from member
+                                com.mycompany.pagibigapplication.dao.EmployerDao employerDao = new com.mycompany.pagibigapplication.dao.impl.EmployerDaoImpl();
+                                com.mycompany.pagibigapplication.models.Employer employer = null;
+                                if (member != null) {
+                                    employer = employerDao.getEmployerByEmployerId(String.valueOf(member.getEmployerId()));
+                                }
+
+                                com.mycompany.pagibigapplication.models.Application application = new com.mycompany.pagibigapplication.models.Application();
+                                application.setApplicationNo(applicationNoInt);
+                                application.setPagibigMid(pagibigMid);
+
+                                Object dateSubmittedObj = model.getValueAt(modelRow, 2);
+                                if (dateSubmittedObj != null) {
+                                    try {
+                                        application.setDateSubmitted(java.time.LocalDate.parse(dateSubmittedObj.toString()));
+                                    } catch (java.time.format.DateTimeParseException ex) {
+                                        application.setDateSubmitted(null);
+                                    }
+                                } else {
+                                    application.setDateSubmitted(null);
+                                }
+
+                                Object statusObj = model.getValueAt(modelRow, 5);
+                                if (statusObj != null) {
+                                    try {
+                                        application.setStatus(com.mycompany.pagibigapplication.models.Application.Status.valueOf(statusObj.toString()));
+                                        if(application.getStatus() == null) {
+                                            application.setStatus(com.mycompany.pagibigapplication.models.Application.Status.Pending);
+                                        }
+                                    } catch (IllegalArgumentException ex) {
+                                        application.setStatus(com.mycompany.pagibigapplication.models.Application.Status.Pending);
+                                    }
+                                } else {
+                                    application.setStatus(com.mycompany.pagibigapplication.models.Application.Status.Pending);
+                                }
+
+                                LoanRecordDialog dialog = new LoanRecordDialog(LoanQueue.this, application, loanApplications, collateral, spouse, banks, realEstates, credits, employer, pagibigMid);
+                                dialog.setVisible(true);
+                            } catch (Exception ex) {
+                                ex.printStackTrace();
+                                JOptionPane.showMessageDialog(LoanQueue.this, "Failed to load application details: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                            }
+                        }
                     }
                 });
             }
@@ -455,6 +534,7 @@ public class LoanQueue extends javax.swing.JFrame {
                 return "View Record";
             }
         });
+
         
         JTableHeader tableHeader = table.getTableHeader();
         tableHeader.setBackground(Color.WHITE);
@@ -484,14 +564,28 @@ public class LoanQueue extends javax.swing.JFrame {
             Connection conn = DBConnection.getConnection();
             MemberApplication memberAppService = new MemberApplication(conn);
             List<Application> apps = memberAppService.getAllApplications();
+            com.mycompany.pagibigapplication.services.MemberService memberService = new com.mycompany.pagibigapplication.services.MemberService(conn);
             for (Application app : apps) {
+                String memberName = "";
+                String pagibigMidFK = app.getMemberName();
+                String pagibigMid = app.getPagibigMid(); 
+                
+                try {
+                    com.mycompany.pagibigapplication.dao.MemberDao memberDao = new com.mycompany.pagibigapplication.dao.impl.MemberDaoImpl();
+                    com.mycompany.pagibigapplication.models.Member member = memberDao.getMemberByPagibigMid(pagibigMid);
+                    if (member != null) {
+                        memberName = member.getName();
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
                 model.addRow(new Object[]{
                     app.getApplicationNo(),
-                    app.getMemberName(),
+                    memberName,
                     app.getDateSubmitted(),
                     app.getPagibigMid(),
-                    "", 
-                    app.getStatus()
+                    "View Record", 
+                    app.getStatus() != null ? app.getStatus().name() : "Pending"
                 });
             }
         } catch (SQLException e) {
@@ -518,6 +612,7 @@ public class LoanQueue extends javax.swing.JFrame {
         this.getContentPane().repaint();
         this.getContentPane().revalidate();
     }
+    
     
     private JButton createSidebarButton(String text, String iconPath, int yPosition) {
         ImageIcon icon = new ImageIcon(iconPath);

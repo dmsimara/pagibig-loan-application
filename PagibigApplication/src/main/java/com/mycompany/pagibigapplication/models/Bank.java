@@ -17,13 +17,14 @@ public class Bank {
     private AccountType enumAccountType; 
 
     private LocalDate dtDateOpened;       
-    private BigDecimal bdAverageBalance;  
+    private BigDecimal bdAverageBalance; 
+    private int intApplicationNo;
 
     public Bank() {
     }
 
     public Bank(String strBankId, String strBankName, String intAccountNumber, String intHousingAccountNo,
-                String strBankBranch, AccountType enumAccountType, LocalDate dtDateOpened, BigDecimal bdAverageBalance) {
+                String strBankBranch, AccountType enumAccountType, LocalDate dtDateOpened, BigDecimal bdAverageBalance, int intApplicationNo) {
         this.strBankId = strBankId;
         this.strBankName = strBankName;
         this.intAccountNumber = intAccountNumber;
@@ -32,6 +33,7 @@ public class Bank {
         this.enumAccountType = enumAccountType;
         this.dtDateOpened = dtDateOpened;
         this.bdAverageBalance = bdAverageBalance;
+        this.intApplicationNo = intApplicationNo;
     }
 
 
@@ -97,5 +99,13 @@ public class Bank {
 
     public void setBdAverageBalance(BigDecimal bdAverageBalance) {
         this.bdAverageBalance = bdAverageBalance;
+    }
+    
+    public int getIntApplicationNo() {
+        return intApplicationNo;
+    }
+
+    public void setIntApplicationNo(int intApplicationNo) {
+        this.intApplicationNo = intApplicationNo;
     }
 }

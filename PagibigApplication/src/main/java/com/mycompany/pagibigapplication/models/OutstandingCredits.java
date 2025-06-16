@@ -39,14 +39,15 @@ public class OutstandingCredits {
     private CreditType enumCreditType;
     private LocalDate dtMaturityDate;      
     private BigDecimal bdOutstandingBalance;    
-    private BigDecimal bdMonthlyAmortization;    
+    private BigDecimal bdMonthlyAmortization;   
+    private int intApplicationNo;
 
     public OutstandingCredits() {
     }
 
     public OutstandingCredits(String strCreditorId, String strCreditorName, String strCreditorAddress, String strHousingAccountNo,
                              CreditSecurity enumCreditSecurity, CreditType enumCreditType, LocalDate dtMaturityDate,
-                             BigDecimal bdOutstandingBalance, BigDecimal bdMonthlyAmortization) {
+                             BigDecimal bdOutstandingBalance, BigDecimal bdMonthlyAmortization, int intApplicationNo) {
         this.strCreditorId = strCreditorId;
         this.strCreditorName = strCreditorName;
         this.strCreditorAddress = strCreditorAddress;
@@ -56,6 +57,7 @@ public class OutstandingCredits {
         this.dtMaturityDate = dtMaturityDate;
         this.bdOutstandingBalance = bdOutstandingBalance;
         this.bdMonthlyAmortization = bdMonthlyAmortization;
+        this.intApplicationNo = intApplicationNo;
     }
 
 
@@ -129,5 +131,13 @@ public class OutstandingCredits {
 
     public void setBdMonthlyAmortization(BigDecimal bdMonthlyAmortization) {
         this.bdMonthlyAmortization = bdMonthlyAmortization;
+    }
+    
+    public int getIntApplicationNo() {
+        return intApplicationNo;
+    }
+
+    public void setIntApplicationNo(int intApplicationNo) {
+        this.intApplicationNo = intApplicationNo;
     }
 }
