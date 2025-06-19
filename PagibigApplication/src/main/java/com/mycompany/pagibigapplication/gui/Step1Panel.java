@@ -8,7 +8,7 @@ import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.event.DocumentListener;
-import org.w3c.dom.events.DocumentEvent;
+import java.util.UUID;
 
 public class Step1Panel extends javax.swing.JPanel {
     
@@ -62,6 +62,7 @@ public class Step1Panel extends javax.swing.JPanel {
         this.add(lblHousingAccountNo, gbc);
         tfHousingAccountNo = new JTextField(15);
         tfHousingAccountNo.setFont(new Font("SansSerif", Font.PLAIN, 16));
+        tfHousingAccountNo.setEnabled(false); // disable input, generated automatically
         gbc.gridx = 1;
         this.add(tfHousingAccountNo, gbc);
 
@@ -227,7 +228,11 @@ public class Step1Panel extends javax.swing.JPanel {
                 btnNext.setEnabled(false); // disable to prevent double submission
                 LoanApplication loan = appData.getLoan();
 
-                loan.setHousingAccountNo(tfHousingAccountNo.getText());
+                // Generate 12-digit HousingAccountNo automatically
+                String generatedHousingAccountNo = String.format("%012d", (System.currentTimeMillis() % 1000000000000L));
+                loan.setHousingAccountNo(generatedHousingAccountNo);
+                tfHousingAccountNo.setText(generatedHousingAccountNo);
+
                 loan.setPurposeOfLoan((String) cbPurposeOfLoan.getSelectedItem());
                 loan.setHasExistingApplication(cbExistingApplication.isSelected());
                 loan.setHousingApplicationNo(tfHousingApplicationNo.getText());
@@ -289,7 +294,8 @@ public class Step1Panel extends javax.swing.JPanel {
     void validateForm() {
         boolean isValid = true;
 
-        if (tfHousingAccountNo.getText().trim().isEmpty()) isValid = false;
+        // Remove validation for HousingAccountNo since it is generated automatically
+        // if (tfHousingAccountNo.getText().trim().isEmpty()) isValid = false;
         if (cbPurposeOfLoan.getSelectedIndex() == 0) isValid = false;
         if (cbExistingApplication.isSelected() && tfHousingApplicationNo.getText().trim().isEmpty()) isValid = false;
         if (tfLoanAmount.getText().trim().isEmpty()) isValid = false;
@@ -300,8 +306,7 @@ public class Step1Panel extends javax.swing.JPanel {
 
         btnNext.setEnabled(isValid);
     }
-
-
+    
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
